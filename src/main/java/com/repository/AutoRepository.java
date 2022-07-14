@@ -34,21 +34,18 @@ public class AutoRepository implements CrudRepository<Auto> {
     }
 
     @Override
-    public boolean create(Auto auto) {
+    public boolean save(Auto auto) {
+        if (auto == null) {
+            throw new IllegalArgumentException("Auto must not be null");
+        }
         autos.add(auto);
+        LOGGER.debug("Created auto {}", auto.getId());
         return true;
     }
 
     @Override
-    public boolean create(List<Auto> auto) {
-        return autos.addAll(auto);
-    }
-
-    @Override
     public boolean update(String id, BigDecimal price) {
-        final Iterator<Auto> iterator = autos.iterator();
-        while (iterator.hasNext()) {
-            final Auto auto = iterator.next();
+        for (Auto auto : autos) {
             if (auto.getId().equals(id)) {
                 auto.setPrice(price);
                 return true;
@@ -69,12 +66,5 @@ public class AutoRepository implements CrudRepository<Auto> {
             }
         }
         return false;
-    }
-
-    private static void copy(final Auto from, final Auto to) {
-        to.setManufacturer(from.getManufacturer());
-        to.setModel(from.getModel());
-        to.setBodyType(from.getBodyType());
-        to.setPrice(from.getPrice());
     }
 }
