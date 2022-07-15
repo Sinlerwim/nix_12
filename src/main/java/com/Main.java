@@ -1,12 +1,13 @@
 package com;
 
+import com.repository.AutoRepository;
 import com.service.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
 public class Main {
-    private static final AutoService AUTO_SERVICE = new AutoService();
+    private static final AutoService AUTO_SERVICE = new AutoService(new AutoRepository());
     private static final BusService BUS_SERVICE = new BusService();
     private static final TruckService TRUCK_SERVICE = new TruckService();
 
