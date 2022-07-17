@@ -1,6 +1,5 @@
 package com.repository;
 
-import com.model.Bus;
 import com.model.Manufacturer;
 import com.model.Truck;
 import org.junit.jupiter.api.Assertions;

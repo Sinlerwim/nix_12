@@ -27,6 +27,17 @@ public class AutoRepository implements CrudRepository<Auto> {
         }
         return null;
     }
+    
+//    public List<Auto> getByPrice(BigDecimal price) {
+//        List<Auto> foundAutos = new ArrayList<>();
+//        for (Auto auto : autos) {
+//            if (auto.getPrice().equals(price)) {
+//                foundAutos.add(auto);
+//
+//            }
+//        }
+//        return foundAutos;
+//    }
 
     @Override
     public List<Auto> getAll() {
@@ -34,7 +45,7 @@ public class AutoRepository implements CrudRepository<Auto> {
     }
 
     @Override
-    public boolean save(Auto auto) {
+    public boolean save(Auto auto) throws IllegalArgumentException {
         if (auto == null) {
             throw new IllegalArgumentException("Auto must not be null");
         }
@@ -67,4 +78,6 @@ public class AutoRepository implements CrudRepository<Auto> {
         }
         return false;
     }
+
+
 }

@@ -6,6 +6,8 @@ import com.repository.AutoRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.ArgumentCaptor;
 
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 
 class AutoServiceTest {
 
@@ -22,7 +25,7 @@ class AutoServiceTest {
 
 
     private Auto createSimpleAuto() {
-        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ZERO, "TestBodyTypeAuto");
+        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ONE, "TestBodyTypeAuto");
     }
 
     @BeforeEach
@@ -52,6 +55,24 @@ class AutoServiceTest {
     }
 
     @Test
+    void create_isCorrectlyCreatedAndSaved () {
+        Auto otherAuto = createSimpleAuto();
+
+        target.create(otherAuto);
+        Mockito.verify(autoRepository).save(argThat(new ArgumentMatcher<Auto>() {
+
+            @Override
+            public boolean matches(Auto auto) {
+                return auto.getId().equals(otherAuto.getId()) &&
+                        auto.getPrice().equals(otherAuto.getPrice()) &&
+                        auto.getManufacturer().equals(otherAuto.getManufacturer()) &&
+                        auto.getBodyType().equals(otherAuto.getBodyType()) &&
+                        auto.getModel().equals(otherAuto.getModel());
+            }
+        }));
+    }
+
+    @Test
     void create_withAutoArgument() {
         target.create(Mockito.mock(Auto.class));
         Mockito.verify(autoRepository).save(Mockito.any());
@@ -69,6 +90,32 @@ class AutoServiceTest {
 
     @Test
     void changePriceById() {
+        ArgumentCaptor<String> captorId = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<BigDecimal> captorPrice = ArgumentCaptor.forClass(BigDecimal.class);
+        Auto auto = createSimpleAuto();
+        target.create(auto);
+        target.changePriceById(auto.getId(), BigDecimal.TEN);
+
+        Mockito.verify(autoRepository, Mockito.times(1)).update(captorId.capture(), captorPrice.capture());
+        Assertions.assertEquals(BigDecimal.TEN, captorPrice.getValue());
+        Assertions.assertEquals(auto.getId(), captorId.getValue());
+    }
+
+    @Test
+    void changePriceById_negativePrice() {
+        Auto auto = createSimpleAuto();
+        target.create(auto);
+        Mockito.when(autoRepository.update(anyString(), any())).thenThrow(
+                IllegalArgumentException.class);
+
+        target.changePriceById(auto.getId(), BigDecimal.valueOf(-1));
+    }
+
+    @Test
+    void getSumAllPrices_emptyRepository() {
+        Mockito.when(autoRepository.getAll()).thenCallRealMethod();
+        Assertions.assertEquals(BigDecimal.ZERO, target.getSumAllPrices());
+//        Assertions.assertThrows(NullPointerException.class, () -> target.getSumAllPrices());
     }
 
     @Test

@@ -59,10 +59,31 @@ public class AutoService {
     }
 
     public boolean changePriceById(String id, BigDecimal price) {
-        return AUTO_REPOSITORY.update(id, price);
+        if (price.compareTo(BigDecimal.ZERO) >= 0) {
+            return AUTO_REPOSITORY.update(id, price);
+        }
+        else {
+            return false;
+        }
     }
 
     public boolean delete(String id) {
         return AUTO_REPOSITORY.delete(id);
+    }
+
+    public BigDecimal getSumAllPrices() {
+        List<Auto> autos = AUTO_REPOSITORY.getAll();
+        if (autos == null || autos.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal sumPrices = BigDecimal.ZERO;
+        for (Auto auto : autos) {
+            sumPrices = sumPrices.add(auto.getPrice());
+        }
+        return sumPrices;
+    }
+
+    public void printSumAllPrices() {
+        System.out.println("Sum of all prices = " + getSumAllPrices());;
     }
 }
