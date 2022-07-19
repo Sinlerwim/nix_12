@@ -21,13 +21,13 @@ public class TruckRepository implements CrudRepository<Truck>{
     }
 
     @Override
-    public Truck getById(String id) {
+    public Optional<Truck> findById(String id) {
         for (Truck truck : trucks){
             if (truck.getId().equals(id)) {
-                return truck;
+                return Optional.of(truck);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override

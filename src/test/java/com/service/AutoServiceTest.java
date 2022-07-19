@@ -3,6 +3,7 @@ package com.service;
 import com.model.Auto;
 import com.model.Manufacturer;
 import com.repository.AutoRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,8 @@ import org.mockito.Mockito;
 import org.mockito.ArgumentCaptor;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,6 +25,10 @@ class AutoServiceTest {
 
     private AutoService target;
     private AutoRepository autoRepository;
+    private final PrintStream standardOut = System.out;
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    private Auto auto = createSimpleAuto();
+ //   private final String targetAuto =
 
 
     private Auto createSimpleAuto() {
@@ -31,8 +38,15 @@ class AutoServiceTest {
     @BeforeEach
     void setUp() {
         autoRepository = Mockito.mock(AutoRepository.class);
+        System.setOut(new PrintStream(outputStreamCaptor));
 
         target = new AutoService(autoRepository);
+//        Mockito.when(auto.getId()).thenReturn("123");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        System.setOut(standardOut);
     }
 
     @Test
@@ -115,10 +129,96 @@ class AutoServiceTest {
     void getSumAllPrices_emptyRepository() {
         Mockito.when(autoRepository.getAll()).thenCallRealMethod();
         Assertions.assertEquals(BigDecimal.ZERO, target.getSumAllPrices());
-//        Assertions.assertThrows(NullPointerException.class, () -> target.getSumAllPrices());
     }
 
     @Test
     void delete() {
+    }
+
+    @Test
+    void findAutoByIdAndPrint_existingAuto() {
+        Mockito.when(autoRepository.findById(Mockito.any())).thenReturn(java.util.Optional.of(auto));
+
+        target.findAutoByIdAndPrint(auto.getId());
+        Assertions.assertEquals(auto.toString(), outputStreamCaptor.toString().trim());
+    }
+
+    @Test
+    void findAutoByIdAndPrint_notExistingAuto() {
+        target.findAutoByIdAndPrint("");
+        Assertions.assertNotEquals(auto.toString(), outputStreamCaptor.toString().trim());
+    }
+
+    @Test
+    void findAutoByPriceOrPrintNew_existingAuto() {
+        Mockito.when(autoRepository.findByPrice(Mockito.any())).thenReturn(java.util.Optional.of(auto));
+        target.findAutoByPriceOrPrintNew(auto.getPrice());
+
+        Assertions.assertEquals(auto.toString(), outputStreamCaptor.toString().trim());
+    }
+
+    @Test
+    void findAutoByPriceOrPrintNew_notExistingAuto() {
+        target.findAutoByPriceOrPrintNew(BigDecimal.ZERO);
+        Assertions.assertNotEquals(auto.toString(), outputStreamCaptor.toString().trim());
+    }
+
+    @Test
+    void findAutoByPriceOrCreateNew_existingAuto() {
+        Mockito.when(autoRepository.findByPrice(Mockito.any())).thenReturn(java.util.Optional.of(auto));
+
+        Assertions.assertEquals(target.findAutoByPriceOrCreateNew(auto.getPrice()), auto);
+    }
+
+    @Test
+    void findAutoByPriceAndReturnId_existingAuto() {
+        Mockito.when(autoRepository.findByPrice(Mockito.any())).thenReturn(java.util.Optional.of(auto));
+
+        Assertions.assertEquals(auto.getId(), target.findAutoByPriceAndReturnId(auto.getPrice()));
+    }
+
+    @Test
+    void findAutoByPriceAndReturnId_notExistingAuto() {
+        Assertions.assertEquals(String.valueOf(0), target.findAutoByPriceAndReturnId(auto.getPrice()));
+    }
+
+
+    @Test
+    void findAutoByPriceOrReturnNew_existingAuto() {
+        Mockito.when(autoRepository.findByPrice(Mockito.any())).thenReturn(java.util.Optional.of(auto));
+
+        Assertions.assertEquals(target.findAutoByPriceOrReturnNew(auto.getPrice()), auto);
+    }
+
+    @Test
+    void findAutoByPriceOrReturnNew_notExistingAuto() {
+        Assertions.assertNotEquals(target.findAutoByPriceOrReturnNew(auto.getPrice()), auto);
+    }
+
+    @Test
+    void findAutoByIdAndFilter_existingAutoAndPassFilter() throws Exception {
+        Mockito.when(autoRepository.findById(Mockito.any())).thenReturn(java.util.Optional.of(auto));
+
+        Assertions.assertEquals(auto, target.findAutoByIdAndFilter(auto.getId(),BigDecimal.ZERO));
+    }
+
+    @Test
+    void findAutoByIdAndFilter_existingAutoAndDoesntPassFilter() throws Exception {
+        Mockito.when(autoRepository.findById(Mockito.any())).thenReturn(java.util.Optional.of(auto));
+
+        Exception exception = Assertions.assertThrows(Exception.class,() -> target.findAutoByIdAndFilter(auto.getId(),BigDecimal.TEN));
+        Assertions.assertEquals("Filter exception", exception.getMessage());
+    }
+
+    @Test
+    void findAutoByIdAndFilter_notExistingAutoAndPassFilter() throws Exception {
+        Exception exception = Assertions.assertThrows(Exception.class,() -> target.findAutoByIdAndFilter(auto.getId(),BigDecimal.ZERO));
+        Assertions.assertEquals("Filter exception", exception.getMessage());
+    }
+
+    @Test
+    void findAutoByIdAndFilter_notExistingAutoAndDoesntPassFilter() throws Exception {
+        Exception exception = Assertions.assertThrows(Exception.class,() -> target.findAutoByIdAndFilter(auto.getId(),BigDecimal.TEN));
+        Assertions.assertEquals("Filter exception", exception.getMessage());
     }
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 class TruckRepositoryTest {
     private TruckRepository target;
@@ -27,25 +28,25 @@ class TruckRepositoryTest {
 
     @Test
     void getById_findOne() {
-        final Truck actual = target.getById(bus.getId());
+        final Optional<Truck> actual = target.findById(bus.getId());
         Assertions.assertNotNull(actual);
-        Assertions.assertEquals(bus.getId(), actual.getId());
+        Assertions.assertEquals(bus.getId(), actual.get().getId());
     }
 
     @Test
     void getById_notFound() {
-        final Truck actual = target.getById("");
-        Assertions.assertNull(actual);
+        final Optional<Truck> actual = target.findById("");
+        Assertions.assertEquals(Optional.empty(), actual);
     }
 
     @Test
     void getById_findOne_manyAutos() {
         final Truck otherAuto = createSimpleTruck();
         target.save(otherAuto);
-        final Truck actual = target.getById(bus.getId());
+        final Optional<Truck> actual = target.findById(bus.getId());
         Assertions.assertNotNull(actual);
-        Assertions.assertEquals(bus.getId(), actual.getId());
-        Assertions.assertNotEquals(otherAuto.getId(),actual.getId());
+        Assertions.assertEquals(bus.getId(), actual.get().getId());
+        Assertions.assertNotEquals(otherAuto.getId(),actual.get().getId());
     }
 
     @Test
@@ -70,10 +71,10 @@ class TruckRepositoryTest {
     @Test
     void update_successful() {
         final boolean actual = target.update(bus.getId(), BigDecimal.TEN);
-        final Truck actualAuto = target.getById(bus.getId());
+        final Optional<Truck> actualAuto = target.findById(bus.getId());
         Assertions.assertTrue(actual);
-        Assertions.assertEquals(actualAuto.getId(), bus.getId());
-        Assertions.assertEquals(BigDecimal.TEN, actualAuto.getPrice());
+        Assertions.assertEquals(actualAuto.get().getId(), bus.getId());
+        Assertions.assertEquals(BigDecimal.TEN, actualAuto.get().getPrice());
     }
 
     @Test
