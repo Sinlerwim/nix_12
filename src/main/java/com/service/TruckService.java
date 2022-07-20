@@ -2,29 +2,32 @@ package com.service;
 
 import com.model.Truck;
 import com.model.Manufacturer;
-import com.repository.TruckRepository;
+import com.repository.CrudRepository;
 
 import java.math.BigDecimal;
 
-public class TruckService {
+public class TruckService extends VehicleService<Truck> {
 
-    private static final TruckRepository TRUCK_REPOSITORY = new TruckRepository();
+
+    public TruckService(CrudRepository<Truck> repository) {
+        super(repository);
+    }
 
     public void create(String model, Manufacturer manufacturer, BigDecimal price, int allowTrailerWeight) {
-        TRUCK_REPOSITORY.save(new Truck(model, manufacturer, price, allowTrailerWeight));
+        repository.save(new Truck(model, manufacturer, price, allowTrailerWeight));
     }
 
     public void printAll() {
-        for (Truck truck : TRUCK_REPOSITORY.getAll()) {
+        for (Truck truck : repository.getAll()) {
             System.out.println(truck);
         }
     }
 
     public boolean changePriceById(String id, BigDecimal price) {
-        return TRUCK_REPOSITORY.update(id, price);
+        return repository.update(id, price);
     }
 
     public boolean delete(String id) {
-        return TRUCK_REPOSITORY.delete(id);
+        return repository.delete(id);
     }
 }

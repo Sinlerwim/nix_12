@@ -1,6 +1,8 @@
 package com;
 
 import com.repository.AutoRepository;
+import com.repository.BusRepository;
+import com.repository.TruckRepository;
 import com.service.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,8 +11,8 @@ import java.math.BigDecimal;
 
 public class Main {
     private static final AutoService AUTO_SERVICE = new AutoService(new AutoRepository());
-    private static final BusService BUS_SERVICE = new BusService();
-    private static final TruckService TRUCK_SERVICE = new TruckService();
+    private static final BusService BUS_SERVICE = new BusService(new BusRepository());
+    private static final TruckService TRUCK_SERVICE = new TruckService(new TruckRepository());
 
     private static void printAllServices() {
         System.out.println("\nList of all vehicles:");

@@ -3,28 +3,31 @@ package com.service;
 import com.model.Bus;
 import com.model.Manufacturer;
 import com.repository.BusRepository;
+import com.repository.CrudRepository;
 
 import java.math.BigDecimal;
 
-public class BusService {
+public class BusService extends VehicleService<Bus> {
 
-    private static final BusRepository BUS_REPOSITORY = new BusRepository();
+    public BusService(CrudRepository<Bus> repository) {
+        super(repository);
+    }
 
     public void create(String model, Manufacturer manufacturer, BigDecimal price, int numberOfSeats) {
-        BUS_REPOSITORY.save(new Bus(model, manufacturer, price, numberOfSeats));
+        repository.save(new Bus(model, manufacturer, price, numberOfSeats));
     }
 
     public void printAll() {
-        for (Bus bus : BUS_REPOSITORY.getAll()) {
+        for (Bus bus : repository.getAll()) {
             System.out.println(bus);
         }
     }
 
     public boolean changePriceById(String id, BigDecimal price) {
-        return BUS_REPOSITORY.update(id, price);
+        return repository.update(id, price);
     }
 
     public boolean delete(String id) {
-        return BUS_REPOSITORY.delete(id);
+        return repository.delete(id);
     }
 }
