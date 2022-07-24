@@ -3,6 +3,7 @@ package com.service;
 import com.model.Auto;
 import com.model.Manufacturer;
 import com.repository.AutoRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +15,28 @@ import java.util.Random;
 public class AutoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoService.class);
+    private final AutoRepository AUTO_REPOSITORY;
     private static final Random RANDOM = new Random();
-    private static final AutoRepository AUTO_REPOSITORY = new AutoRepository();
 
-    public List<Auto> createAutos(int count) {
+    public AutoService(AutoRepository autoRepository) {
+        AUTO_REPOSITORY = autoRepository;
+    }
+
+    public void create(String model, Manufacturer manufacturer, BigDecimal price, String bodyType) {
+        AUTO_REPOSITORY.save(new Auto(model, manufacturer, price, bodyType));
+    }
+
+    public void create(Auto auto) {
+        AUTO_REPOSITORY.save(auto);
+    }
+
+    public void printAll() {
+        for (Auto auto : AUTO_REPOSITORY.getAll()) {
+            System.out.println(auto);
+        }
+    }
+
+    public List<Auto> createAndSaveAutos(int count) {
         List<Auto> result = new LinkedList<>();
         for (int i = 0; i < count; i++) {
             final Auto auto = new Auto(
@@ -27,13 +46,10 @@ public class AutoService {
                     "Model-" + RANDOM.nextInt(1000)
             );
             result.add(auto);
+            AUTO_REPOSITORY.save(auto);
             LOGGER.debug("Created auto {}", auto.getId());
         }
         return result;
-    }
-
-    public void create(String model, Manufacturer manufacturer, BigDecimal price, String bodyType) {
-        AUTO_REPOSITORY.create(new Auto(model, manufacturer, price, bodyType));
     }
 
     private Manufacturer getRandomManufacturer() {
@@ -42,21 +58,32 @@ public class AutoService {
         return values[index];
     }
 
-    public void saveAutos(List<Auto> autos) {
-        AUTO_REPOSITORY.create(autos);
-    }
-
-    public void printAll() {
-        for (Auto auto : AUTO_REPOSITORY.getAll()) {
-            System.out.println(auto);
-        }
-    }
-
     public boolean changePriceById(String id, BigDecimal price) {
-        return AUTO_REPOSITORY.update(id, price);
+        if (price.compareTo(BigDecimal.ZERO) >= 0) {
+            return AUTO_REPOSITORY.update(id, price);
+        }
+        else {
+            return false;
+        }
     }
 
     public boolean delete(String id) {
         return AUTO_REPOSITORY.delete(id);
+    }
+
+    public BigDecimal getSumAllPrices() {
+        List<Auto> autos = AUTO_REPOSITORY.getAll();
+        if (autos == null || autos.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal sumPrices = BigDecimal.ZERO;
+        for (Auto auto : autos) {
+            sumPrices = sumPrices.add(auto.getPrice());
+        }
+        return sumPrices;
+    }
+
+    public void printSumAllPrices() {
+        System.out.println("Sum of all prices = " + getSumAllPrices());;
     }
 }

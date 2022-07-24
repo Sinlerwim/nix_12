@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,21 +36,18 @@ public class BusRepository implements CrudRepository<Bus> {
     }
 
     @Override
-    public boolean create(Bus bus) {
+    public boolean save(Bus bus) {
+        if (bus == null) {
+            throw new IllegalArgumentException("Bus must not be null");
+        }
         buses.add(bus);
+        LOGGER.debug("Created bus {}", bus.getId());
         return true;
     }
 
     @Override
-    public boolean create(List<Bus> bus) {
-        return buses.addAll(bus);
-    }
-
-    @Override
     public boolean update(String id, BigDecimal price) {
-        final Iterator<Bus> iterator = buses.iterator();
-        while (iterator.hasNext()) {
-            final Bus bus = iterator.next();
+        for (Bus bus : buses) {
             if (bus.getId().equals(id)) {
                 bus.setPrice(price);
                 return true;

@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,21 +36,18 @@ public class TruckRepository implements CrudRepository<Truck>{
     }
 
     @Override
-    public boolean create(Truck truck) {
+    public boolean save(Truck truck) {
+        if (truck == null) {
+            throw new IllegalArgumentException("Truck must not be null");
+        }
         trucks.add(truck);
+        LOGGER.debug("Created truck {}", truck.getId());
         return true;
     }
 
     @Override
-    public boolean create(List<Truck> truck) {
-        return trucks.addAll(truck);
-    }
-
-    @Override
     public boolean update(String id, BigDecimal price) {
-        final Iterator<Truck> iterator = trucks.iterator();
-        while (iterator.hasNext()) {
-            final Truck truck = iterator.next();
+        for (Truck truck : trucks) {
             if (truck.getId().equals(id)) {
                 truck.setPrice(price);
                 return true;
