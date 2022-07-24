@@ -11,8 +11,8 @@ public class Truck extends Vehicle{
 
     private int allowTrailerWeight;
 
-    public Truck(String model, Manufacturer manufacturer, BigDecimal price, int allowTrailerWeight) {
-        super(model, manufacturer, price);
+    public Truck(String model, Manufacturer manufacturer, BigDecimal price, int allowTrailerWeight, int count) {
+        super(model, manufacturer, price, count);
         this.allowTrailerWeight = allowTrailerWeight;
     }
 

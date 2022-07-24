@@ -1,18 +1,15 @@
 package com.service;
 
 import com.model.*;
-import org.junit.jupiter.api.AfterEach;
+import com.repository.VehicleContainer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class VehicleContainerTest {
 
@@ -29,11 +26,11 @@ class VehicleContainerTest {
     private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
     private Auto createSimpleAuto() {
-        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ONE, "TestBodyType");
+        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ONE, "TestBodyType", 1);
     }
 
     private Bus createSimpleBus() {
-        return new Bus("TestModelBus", Manufacturer.BMW, BigDecimal.TEN, 24);
+        return new Bus("TestModelBus", Manufacturer.BMW, BigDecimal.TEN, 24, 1);
     }
 
 //    private Truck createSimpleTruck() {

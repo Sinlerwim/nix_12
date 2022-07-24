@@ -1,18 +1,26 @@
 package com;
 
+import com.model.Auto;
+import com.model.Manufacturer;
 import com.repository.AutoRepository;
 import com.repository.BusRepository;
+import com.repository.Garage;
 import com.repository.TruckRepository;
 import com.service.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 public class Main {
     private static final AutoService AUTO_SERVICE = new AutoService(new AutoRepository());
     private static final BusService BUS_SERVICE = new BusService(new BusRepository());
     private static final TruckService TRUCK_SERVICE = new TruckService(new TruckRepository());
+    protected static final Random RANDOM = new Random();
 
     private static void printAllServices() {
         System.out.println("\nList of all vehicles:");
@@ -34,9 +42,10 @@ public class Main {
             case "3":
                 Deleting.start(reader, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
                 break;
-//            case "4":
-//                Reading.start(reader, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
-//                break;
+            case "4":
+                comparatorExample();
+                System.out.println("Input any symbol");
+                reader.readLine();
             case "5":
                 printAllServices();
                 break;
@@ -48,6 +57,31 @@ public class Main {
         return true;
     }
 
+    private static void comparatorExample() {
+        System.out.println("There is example of comparator's work");
+        final List<Auto> autos = new LinkedList<>();
+        System.out.println("Not sorted list:");
+        for (int i = 0; i < 6; i++) {
+            final Auto auto = new Auto(
+                    "Model-" + RANDOM.nextInt(1000),
+                    Manufacturer.KIA,
+                    BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
+                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20));
+            System.out.println(auto);
+            autos.add(auto);
+        }
+        final Comparator<Auto> comparator = Comparator.comparing(Auto::getPrice).reversed()
+                .thenComparing(auto -> auto.getClass().getSimpleName())
+                .thenComparingInt(Auto::getCount);
+        autos.sort(comparator);
+        System.out.println("Sorted list:");
+        for (Auto auto : autos) {
+            System.out.println(auto);
+        }
+
+    }
+
+
     public static void main(String[] args) {
         System.out.println("\n\n\nWelcome to homework #10!\n\nHere will be the list of your vehicles.\n");
         AUTO_SERVICE.createAndSaveAutos(5);
@@ -57,7 +91,7 @@ public class Main {
                 System.out.println("1. To CREATE the new vehicle");
                 System.out.println("2. To UPDATE the price by id");
                 System.out.println("3. To DELETE one by id ");
-//                System.out.println("4. To FIND vehicle by parameter");
+                System.out.println("4. To check comparator's work");
                 System.out.println("5. To PRINT list of existing vehicles");
                 System.out.println("Choose the action you need (1-4) or 0 to exit:");
             } while(navigation(reader));

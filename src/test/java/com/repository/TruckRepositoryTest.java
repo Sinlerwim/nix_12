@@ -16,7 +16,7 @@ class TruckRepositoryTest {
     private Truck bus;
 
     private Truck createSimpleTruck() {
-        return new Truck("TestModelTruck", Manufacturer.KIA, BigDecimal.ZERO, 8000);
+        return new Truck("TestModelTruck", Manufacturer.KIA, BigDecimal.ZERO, 8000, 1);
     }
 
     @BeforeEach

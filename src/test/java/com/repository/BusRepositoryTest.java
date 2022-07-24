@@ -16,7 +16,7 @@ class BusRepositoryTest {
     private Bus bus;
 
     private Bus createSimpleBus() {
-        return new Bus("TestModelBus", Manufacturer.KIA, BigDecimal.ZERO, 24);
+        return new Bus("TestModelBus", Manufacturer.KIA, BigDecimal.ZERO, 24, 1);
     }
 
     @BeforeEach
