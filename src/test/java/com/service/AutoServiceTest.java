@@ -28,7 +28,6 @@ class AutoServiceTest {
     private final PrintStream standardOut = System.out;
     private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
     private Auto auto = createSimpleAuto();
- //   private final String targetAuto =
 
 
     private Auto createSimpleAuto() {
@@ -41,7 +40,6 @@ class AutoServiceTest {
         System.setOut(new PrintStream(outputStreamCaptor));
 
         target = new AutoService(autoRepository);
-//        Mockito.when(auto.getId()).thenReturn("123");
     }
 
     @AfterEach

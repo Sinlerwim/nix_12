@@ -1,5 +1,6 @@
 package com.repository;
 
+import com.model.Auto;
 import com.model.Truck;
 
 import java.math.BigDecimal;
@@ -68,5 +69,15 @@ public class TruckRepository implements CrudRepository<Truck>{
             }
         }
         return false;
+    }
+
+    @Override
+    public Optional<Truck> findByPrice(BigDecimal price) {
+        for (Truck truck : trucks) {
+            if (price.compareTo(truck.getPrice()) == 0) {
+                return Optional.of(truck);
+            }
+        }
+        return Optional.empty();
     }
 }
