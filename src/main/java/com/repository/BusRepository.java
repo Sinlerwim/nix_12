@@ -21,13 +21,13 @@ public class BusRepository implements CrudRepository<Bus> {
     }
 
     @Override
-    public Bus getById(String id) {
+    public Optional<Bus> findById(String id) {
         for (Bus bus : buses) {
             if (bus.getId().equals(id)) {
-                return bus;
+                return Optional.of(bus);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override

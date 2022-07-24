@@ -5,12 +5,11 @@ import com.model.Manufacturer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 
 class AutoRepositoryTest {
@@ -33,27 +32,27 @@ class AutoRepositoryTest {
     }
 
     @Test
-    void getById_findOne() {
+    void findById_findOne() {
 //        Mockito.when(auto.getId()).thenReturn("123");
-        final Auto actual = target.getById(auto.getId());
+        final Optional<Auto> actual = target.findById(auto.getId());
         Assertions.assertNotNull(actual);
-        Assertions.assertEquals(auto.getId(), actual.getId());
+        Assertions.assertEquals(auto.getId(), actual.get().getId());
     }
 
     @Test
-    void getById_notFound() {
-        final Auto actual = target.getById("");
-        Assertions.assertNull(actual);
+    void findById_notFound() {
+        final Optional<Auto> actual = target.findById("");
+        Assertions.assertEquals(Optional.empty(), actual);
     }
 
     @Test
-    void getById_findOne_manyAutos() {
+    void findById_findOne_manyAutos() {
         final Auto otherAuto = createSimpleAuto();
         target.save(otherAuto);
-        final Auto actual = target.getById(auto.getId());
+        final Optional<Auto> actual = target.findById(auto.getId());
         Assertions.assertNotNull(actual);
-        Assertions.assertEquals(auto.getId(), actual.getId());
-        Assertions.assertNotEquals(otherAuto.getId(),actual.getId());
+        Assertions.assertEquals(auto.getId(), actual.get().getId());
+        Assertions.assertNotEquals(otherAuto.getId(),actual.get().getId());
     }
 
 //    @Test
@@ -90,10 +89,10 @@ class AutoRepositoryTest {
         auto = createSimpleAuto();
         target.save(auto);
         final boolean actual = target.update(auto.getId(), BigDecimal.TEN);
-        final Auto actualAuto = target.getById(auto.getId());
+        final Optional<Auto> actualAuto = target.findById(auto.getId());
         Assertions.assertTrue(actual);
-        Assertions.assertEquals(actualAuto.getId(), auto.getId());
-        Assertions.assertEquals(BigDecimal.TEN, actualAuto.getPrice());
+        Assertions.assertEquals(actualAuto.get().getId(), auto.getId());
+        Assertions.assertEquals(BigDecimal.TEN, actualAuto.get().getPrice());
     }
 
     @Test
