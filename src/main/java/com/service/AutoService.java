@@ -24,8 +24,8 @@ public class AutoService extends VehicleService<Auto> {
 //        AUTO_REPOSITORY = new AutoRepository();
 //    }
 
-    public void create(String model, Manufacturer manufacturer, BigDecimal price, String bodyType) {
-        repository.save(new Auto(model, manufacturer, price, bodyType));
+    public void create(String model, Manufacturer manufacturer, BigDecimal price, String bodyType, int count) {
+        repository.save(new Auto(model, manufacturer, price, bodyType, count));
     }
 
     public void create(Auto auto) {
@@ -45,7 +45,7 @@ public class AutoService extends VehicleService<Auto> {
                     "Model-" + RANDOM.nextInt(1000),
                     getRandomManufacturer(),
                     BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                    "Model-" + RANDOM.nextInt(1000)
+                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20)
             );
             result.add(auto);
             repository.save(auto);
@@ -59,7 +59,7 @@ public class AutoService extends VehicleService<Auto> {
                     "Model-" + RANDOM.nextInt(1000),
                     getRandomManufacturer(),
                     BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                    "Model-" + RANDOM.nextInt(1000)
+                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20)
             );
     }
 
@@ -101,7 +101,7 @@ public class AutoService extends VehicleService<Auto> {
         Auto foundAuto = repository.findByPrice(price).orElse(new Auto("Model-" +RANDOM.nextInt(1000),
                 getRandomManufacturer(),
                 BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                "Model-" + RANDOM.nextInt(1000)));
+                "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 10)));
         System.out.println(foundAuto);
     }
 
@@ -118,7 +118,7 @@ public class AutoService extends VehicleService<Auto> {
         Optional<Auto> foundAuto = repository.findByPrice(price).or(() -> Optional.of(new Auto("Model-" + RANDOM.nextInt(1000),
                 getRandomManufacturer(),
                 BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                "Model-" + RANDOM.nextInt(1000))));
+                "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 10))));
         return foundAuto.get();
     }
 

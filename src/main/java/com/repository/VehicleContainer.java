@@ -1,4 +1,4 @@
-package com.service;
+package com.repository;
 
 import com.model.Auto;
 import com.model.Vehicle;

@@ -50,7 +50,7 @@ public class Creating {
         System.out.println("Ok. You want to create an auto.");
         System.out.println("Print the body type:");
         bodyType = reader.readLine();
-        AUTO_SERVICE.create(getModel(reader), getManufacturer(reader), getPrice(reader), bodyType);
+        AUTO_SERVICE.create(getModel(reader), getManufacturer(reader), getPrice(reader), bodyType, 1);
     }
 
     private static void creatingBus(BufferedReader reader, BusService BUS_SERVICE) throws IOException {

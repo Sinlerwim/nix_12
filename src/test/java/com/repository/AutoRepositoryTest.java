@@ -19,7 +19,7 @@ class AutoRepositoryTest {
     private Auto auto;
 
     private Auto createSimpleAuto() {
-        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ZERO, "TestBodyTypeAuto");
+        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ZERO, "TestBodyTypeAuto", 1);
     }
 
     @BeforeEach
