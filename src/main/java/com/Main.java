@@ -2,10 +2,7 @@ package com;
 
 import com.model.Auto;
 import com.model.Manufacturer;
-import com.repository.AutoRepository;
-import com.repository.BusRepository;
-import com.repository.Garage;
-import com.repository.TruckRepository;
+import com.repository.*;
 import com.service.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -49,6 +46,9 @@ public class Main {
             case "5":
                 printAllServices();
                 break;
+            case "6":
+                Tree(reader);
+                break;
             case "0":
                 return false;
             default:
@@ -81,6 +81,26 @@ public class Main {
 
     }
 
+    private static void Tree(BufferedReader reader) throws IOException {
+        System.out.println("This is example of binary tree");
+        BinaryTree tree = new BinaryTree();
+        for (int i = 0; i < 6; i++) {
+            final Auto auto = new Auto(
+                    "Model-" + RANDOM.nextInt(1000),
+                    Manufacturer.KIA,
+                    BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
+                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20));
+            System.out.println(auto);
+            tree.add(auto);
+        }
+        System.out.println("As tree:");
+        tree.printToConsole();
+        System.out.println("Sum of left = "+ tree.sumLeft());
+        System.out.println("Sum of right = "+ tree.sumRight());
+        System.out.println("Print any symbol to exit");
+        reader.readLine();
+    }
+
 
     public static void main(String[] args) {
         System.out.println("\n\n\nWelcome to homework #10!\n\nHere will be the list of your vehicles.\n");
@@ -93,7 +113,8 @@ public class Main {
                 System.out.println("3. To DELETE one by id ");
                 System.out.println("4. To check comparator's work");
                 System.out.println("5. To PRINT list of existing vehicles");
-                System.out.println("Choose the action you need (1-4) or 0 to exit:");
+                System.out.println("6. to check Tree work example");
+                System.out.println("Choose the action you need (1-6) or 0 to exit:");
             } while(navigation(reader));
         } catch (Exception e) {
             System.out.println("Error: " + e);
