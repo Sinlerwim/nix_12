@@ -14,7 +14,7 @@ public class TruckService extends VehicleService<Truck> {
     }
 
     public void create(String model, Manufacturer manufacturer, BigDecimal price, int allowTrailerWeight) {
-        repository.save(new Truck(model, manufacturer, price, allowTrailerWeight));
+        repository.save(new Truck(model, manufacturer, price, allowTrailerWeight, 1));
     }
 
     public void printAll() {

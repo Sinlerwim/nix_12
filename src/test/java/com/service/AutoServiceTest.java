@@ -31,7 +31,7 @@ class AutoServiceTest {
 
 
     private Auto createSimpleAuto() {
-        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ONE, "TestBodyTypeAuto");
+        return new Auto("TestModelAuto", Manufacturer.KIA, BigDecimal.ONE, "TestBodyTypeAuto", 1);
     }
 
     @BeforeEach

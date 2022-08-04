@@ -14,7 +14,7 @@ public class BusService extends VehicleService<Bus> {
     }
 
     public void create(String model, Manufacturer manufacturer, BigDecimal price, int numberOfSeats) {
-        repository.save(new Bus(model, manufacturer, price, numberOfSeats));
+        repository.save(new Bus(model, manufacturer, price, numberOfSeats, 1));
     }
 
     public void printAll() {
