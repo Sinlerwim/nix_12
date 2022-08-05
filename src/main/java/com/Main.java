@@ -188,7 +188,11 @@ public class Main {
                     else return list.contains("Detail-1");
                 }));
         System.out.println("Is all vehicles in List have prices?\t" + IS_ALL_PRICES_EXIST.test(vehiclesList));
-//        System.out.println("Found duplicate object\n" + o1 + '\n' + o2);
+
+        System.out.println("Statistics of prices:");
+        System.out.println(vehiclesList.stream()
+                .mapToDouble((auto) -> auto.getPrice().doubleValue())
+                .summaryStatistics());
 
     }
 
