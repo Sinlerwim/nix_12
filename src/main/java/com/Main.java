@@ -1,23 +1,34 @@
 package com;
 
-import com.model.Auto;
-import com.model.Manufacturer;
+import com.model.*;
 import com.repository.*;
 import com.service.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Main {
     private static final AutoService AUTO_SERVICE = new AutoService(new AutoRepository());
     private static final BusService BUS_SERVICE = new BusService(new BusRepository());
     private static final TruckService TRUCK_SERVICE = new TruckService(new TruckRepository());
     protected static final Random RANDOM = new Random();
+
+    private static final Predicate<List<Vehicle>> IS_ALL_PRICES_EXIST = list -> list
+            .stream()
+            .allMatch(vehicle -> vehicle.getPrice() != null);
+
+    private static final Function<Map<String,Object>, Vehicle> mapToAutoConverter = (map) ->
+            new Auto(
+                    (String) map.getOrDefault("model", "model-1"),
+                    (Manufacturer) map.getOrDefault("manufacturer", Manufacturer.KIA),
+                    (BigDecimal) map.getOrDefault("price", BigDecimal.ZERO),
+                    (String) map.getOrDefault("bodyType", "bodyType-1"),
+                    (int) map.getOrDefault("count", 1));
 
     private static void printAllServices() {
         System.out.println("\nList of all vehicles:");
@@ -47,7 +58,10 @@ public class Main {
                 printAllServices();
                 break;
             case "6":
-                Tree(reader);
+                tree(reader);
+                break;
+            case "7":
+                streamApiExample();
                 break;
             case "0":
                 return false;
@@ -57,16 +71,38 @@ public class Main {
         return true;
     }
 
+    private static Auto createAuto() {
+        return new Auto(
+                "Model-" + RANDOM.nextInt(1000),
+                Manufacturer.KIA,
+                BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
+                "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20));
+    }
+
+    private static Bus createBus() {
+        return new Bus(
+                "Model-" + RANDOM.nextInt(1000),
+                Manufacturer.KIA,
+                BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
+                RANDOM.nextInt(6,24),
+                RANDOM.nextInt(1, 20));
+    }
+
+    private static Truck createTruck() {
+        return new Truck(
+                "Model-" + RANDOM.nextInt(1000),
+                Manufacturer.KIA,
+                BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
+                RANDOM.nextInt(5000, 12000),
+                RANDOM.nextInt(1, 20));
+    }
+
     private static void comparatorExample() {
         System.out.println("There is example of comparator's work");
         final List<Auto> autos = new LinkedList<>();
         System.out.println("Not sorted list:");
         for (int i = 0; i < 6; i++) {
-            final Auto auto = new Auto(
-                    "Model-" + RANDOM.nextInt(1000),
-                    Manufacturer.KIA,
-                    BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20));
+            final Auto auto = createAuto();
             System.out.println(auto);
             autos.add(auto);
         }
@@ -81,16 +117,11 @@ public class Main {
 
     }
 
-    private static void Tree(BufferedReader reader) throws IOException {
+    private static void tree(BufferedReader reader) throws IOException {
         System.out.println("This is example of binary tree");
         BinaryTree tree = new BinaryTree();
         for (int i = 0; i < 6; i++) {
-            final Auto auto = new Auto(
-                    "Model-" + RANDOM.nextInt(1000),
-                    Manufacturer.KIA,
-                    BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20));
-            System.out.println(auto);
+            final Auto auto = createAuto();
             tree.add(auto);
         }
         System.out.println("As tree:");
@@ -100,6 +131,69 @@ public class Main {
         System.out.println("Print any symbol to exit");
         reader.readLine();
     }
+
+    private static void streamApiExample() throws IOException {
+        final List<Vehicle> vehiclesList = new LinkedList<>();
+        for (int i = 0; i < 2; i++) {
+            final Auto auto = createAuto();
+            System.out.println(auto);
+            vehiclesList.add(auto);
+            System.out.println(auto);
+            vehiclesList.add(auto);
+            final Bus bus = createBus();
+            System.out.println(bus);
+            vehiclesList.add(bus);
+            final Truck truck = createTruck();
+            System.out.println(truck);
+            vehiclesList.add(truck);
+        }
+
+        System.out.println("Sum of all prices:");
+        System.out.println(vehiclesList.stream()
+                .map(Vehicle::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.println("Input X for low border of prices:");
+        BigDecimal x = BigDecimal.valueOf(Integer.parseInt(reader.readLine()));
+        System.out.println("Ok. Here the list of autos which prices higher then " + x);
+        vehiclesList.stream()
+                .filter(vehicle-> vehicle.getPrice().compareTo(x) >= 0)
+                .forEach(System.out::println);
+
+        final Comparator<Vehicle> comparator = Comparator.comparing(vehicle -> vehicle.getClass().getSimpleName());
+
+        Map<String, Object> vehiclesMap = vehiclesList.stream()
+                .sorted(comparator)
+                .collect(Collectors.toMap(
+                        Vehicle::getId,
+                        Vehicle::getClass, (o1, o2) -> o1));
+
+        System.out.println("List as Map:");
+        System.out.println(vehiclesMap);
+
+        System.out.println("Input any symbol to continue");
+        reader.readLine();
+
+        System.out.println("Detail-1 has been added to random vehicle");
+        List<String> details = new LinkedList<>();
+        details.add("Detail-1");
+        vehiclesList.get(RANDOM.nextInt(0,6)).setDetails(details);
+        System.out.println("Is any vehicle in List contains Detail-1?\t" + vehiclesList.stream()
+                .map(Vehicle::getDetails)
+//                .map(List::toArray)
+                .anyMatch((list) -> {
+                    if(list == null) return false;
+                    else return list.contains("Detail-1");
+                }));
+        System.out.println("Is all vehicles in List have prices?\t" + IS_ALL_PRICES_EXIST.test(vehiclesList));
+//        System.out.println("Found duplicate object\n" + o1 + '\n' + o2);
+
+    }
+
+
+
 
 
     public static void main(String[] args) {
@@ -114,7 +208,8 @@ public class Main {
                 System.out.println("4. To check comparator's work");
                 System.out.println("5. To PRINT list of existing vehicles");
                 System.out.println("6. to check Tree work example");
-                System.out.println("Choose the action you need (1-6) or 0 to exit:");
+                System.out.println("7. to check Stream API work example");
+                System.out.println("Choose the action you need (1-7) or 0 to exit:");
             } while(navigation(reader));
         } catch (Exception e) {
             System.out.println("Error: " + e);
