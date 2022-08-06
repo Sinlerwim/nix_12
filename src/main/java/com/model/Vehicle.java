@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -14,6 +15,7 @@ public abstract class Vehicle {
     protected BigDecimal price;
     protected Manufacturer manufacturer;
     protected int count;
+    protected List<String> details;
 
     protected Vehicle(String model, Manufacturer manufacturer, BigDecimal price, int count) {
         this.id = UUID.randomUUID().toString();
@@ -21,5 +23,6 @@ public abstract class Vehicle {
         this.manufacturer = manufacturer;
         this.price = price;
         this.count = count;
+        this.details = null;
     }
 }

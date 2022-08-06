@@ -36,22 +36,27 @@ public class BinaryTree {
         @Override
         public String toString() {
             String string = "TreeNode" + this.hashCode() + "{item='" + item + '\'' + ", left=";
-            if (left != null)
+            if (left != null) {
                 string += left.hashCode() + '\'';
-            else string += "0";
+            } else string += "0";
+
             string += ", right= ";
-            if (right != null)
+
+            if (right != null) {
                 string += right.hashCode() + '\'';
-            else string += "0";
+            } else string += "0";
+
             string += ", parent= ";
-            if (parent != null)
+
+            if (parent != null) {
                 string += parent.hashCode() + '\'';
-            else string += "0";
+            } else string += "0";
+
             return string;
         }
     }
 
-    public void add(TreeNode node, Auto element) {
+    private void add(TreeNode node, Auto element) {
         int resultOfComparing = comparator.compare(element, node.item);
         if (resultOfComparing >= 0) {
             if (node.right == null) {
@@ -72,35 +77,6 @@ public class BinaryTree {
             numberOfNodes++;
         } else {
             add(head, element);
-            //           do {
-//                int resultOfComparing = comparator.compare(element, currentNode.item);
-//                while(resultOfComparing >= 0 && currentNode.right != null)
-//                {
-//                    currentNode = currentNode.right;
-//                    resultOfComparing = comparator.compare(element, currentNode.item);
-//                }
-//                if (resultOfComparing >= 0){
-//                    currentNode.right = new TreeNode(null, element, null, currentNode);
-//                    numberOfNodes++;
-//                    return;
-//                } else while ()
-
-
-//                if (resultOfComparing >= 0) {
-//                    if (currentNode.right == null) {
-//
-//                        return;
-//                    }
-//                    currentNode = currentNode.right;
-//                } else {
-//                    if (currentNode.left == null) {
-//                        currentNode.left = new TreeNode(null, element, null, currentNode);
-//                        numberOfNodes++;
-//                        return;
-//                    }
-//                    currentNode = currentNode.left;
-//                }
-//            } while (currentNode.left != null || currentNode.right != null);
         }
     }
 

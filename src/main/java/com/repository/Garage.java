@@ -30,7 +30,6 @@ public class Garage<T extends Vehicle> {
             this.item = element;
             this.restyling = restyling;
             date = new Date();
-            this.restyling = restyling;
             this.next = next;
             this.prev = prev;
         }
