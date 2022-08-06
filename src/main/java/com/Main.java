@@ -3,13 +3,16 @@ package com;
 import com.model.*;
 import com.repository.*;
 import com.service.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+
+import java.io.*;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -17,6 +20,7 @@ public class Main {
     private static final BusService BUS_SERVICE = new BusService(new BusRepository());
     private static final TruckService TRUCK_SERVICE = new TruckService(new TruckRepository());
     protected static final Random RANDOM = new Random();
+    protected static final BufferedReader READER = new BufferedReader(new InputStreamReader(System.in));
 
     private static final Predicate<List<Vehicle>> IS_ALL_PRICES_EXIST = list -> list
             .stream()
@@ -38,30 +42,33 @@ public class Main {
         System.out.println();
     }
 
-    private static boolean navigation(BufferedReader reader) throws IOException {
-        String input = reader.readLine();
+    private static boolean navigation() throws IOException {
+        String input = READER.readLine();
         switch (input) {
             case "1":
-                Creating.start(reader, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
+                Creating.start(READER, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
                 break;
             case "2":
-                Updating.start(reader, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
+                Updating.start(READER, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
                 break;
             case "3":
-                Deleting.start(reader, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
+                Deleting.start(READER, AUTO_SERVICE, BUS_SERVICE, TRUCK_SERVICE);
                 break;
             case "4":
                 comparatorExample();
                 System.out.println("Input any symbol");
-                reader.readLine();
+                READER.readLine();
             case "5":
                 printAllServices();
                 break;
             case "6":
-                tree(reader);
+                tree();
                 break;
             case "7":
                 streamApiExample();
+                break;
+            case "8" :
+                fileReaderExample();
                 break;
             case "0":
                 return false;
@@ -117,7 +124,7 @@ public class Main {
 
     }
 
-    private static void tree(BufferedReader reader) throws IOException {
+    private static void tree() throws IOException {
         System.out.println("This is example of binary tree");
         BinaryTree tree = new BinaryTree();
         for (int i = 0; i < 6; i++) {
@@ -129,7 +136,7 @@ public class Main {
         System.out.println("Sum of left = "+ tree.sumLeft());
         System.out.println("Sum of right = "+ tree.sumRight());
         System.out.println("Print any symbol to exit");
-        reader.readLine();
+        READER.readLine();
     }
 
     private static void streamApiExample() throws IOException {
@@ -153,10 +160,10 @@ public class Main {
                 .map(Vehicle::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         System.out.println("Input X for low border of prices:");
-        BigDecimal x = BigDecimal.valueOf(Integer.parseInt(reader.readLine()));
+        BigDecimal x = BigDecimal.valueOf(Integer.parseInt(READER.readLine()));
         System.out.println("Ok. Here the list of autos which prices higher then " + x);
         vehiclesList.stream()
                 .filter(vehicle-> vehicle.getPrice().compareTo(x) >= 0)
@@ -174,7 +181,7 @@ public class Main {
         System.out.println(vehiclesMap);
 
         System.out.println("Input any symbol to continue");
-        reader.readLine();
+        READER.readLine();
 
         System.out.println("Detail-1 has been added to random vehicle");
         List<String> details = new LinkedList<>();
@@ -196,14 +203,92 @@ public class Main {
 
     }
 
+    private static void fileReaderExample() throws FileNotFoundException {
+        final Pattern JSON_PATTERN = Pattern.compile("\"(.*)\":+ +\"(.*)\"");
+        final Pattern XML_PATTERN = Pattern.compile("<(\\w*)?\\s*(\\w*)?=*\"*(.)*?\"*>+(.*)</.*>");
 
+        Map<String, String> properties = new HashMap<String, String>();
+        initPropertiesMap(properties);
 
+        final File json = new File("src/main/resources/Auto.json");
+        final File xml = new File("src/main/resources/Auto.xml");
+        try (final BufferedReader fileBufferedReader = new BufferedReader(new FileReader(json))) {
+            String line;
+            while ((line = fileBufferedReader.readLine()) != null) {
+                final Matcher matcher = JSON_PATTERN.matcher(line);
+                if (matcher.find()) {
+                    if (properties.containsKey(matcher.group(1))) {
+                        properties.replace(matcher.group(1), matcher.group(2));
+                        System.out.println("JSON: "+matcher.group(1) + '\t' + matcher.group(2));
+                    }
+
+                }
+            }
+
+            System.out.println("Created auto depends on json:");
+            System.out.println(createAutoFromMap(properties));
+
+        } catch (final IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        initPropertiesMap(properties);
+
+        try (final BufferedReader fileBufferedReader = new BufferedReader(new FileReader(xml))) {
+            String line;
+            while ((line = fileBufferedReader.readLine()) != null) {
+                final Matcher matcher = XML_PATTERN.matcher(line);
+                if (matcher.find()) {
+                        if (properties.containsKey(matcher.group(1))) {
+                            properties.replace(matcher.group(1), matcher.group(4));
+                            System.out.println("XML: "+ matcher.group(1) + '\t' + matcher.group(4));
+                        }
+                        if (properties.containsKey(matcher.group(2))) {
+                            properties.replace(matcher.group(2), matcher.group(3));
+                            System.out.println("XML: "+ matcher.group(2) + '\t' + matcher.group(3));
+                    }
+                }
+            }
+
+            System.out.println("Created auto depends on xml:");
+            System.out.println(createAutoFromMap(properties));
+
+        } catch (final IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void initPropertiesMap(Map<String, String> properties) {
+        properties.put("model", null);
+        properties.put("manufacturer", null);
+        properties.put("price", null);
+        properties.put("currency", null);
+        properties.put("bodyType", null);
+        properties.put("created", null);
+        properties.put("count", null);
+        properties.put("volume", null);
+        properties.put("brand", null);
+    }
+
+    private static Auto createAutoFromMap(Map<String, String> properties) throws ParseException {
+        Auto auto = new Auto(properties.get("model"),
+                Manufacturer.valueOf(properties.get("manufacturer")),
+                BigDecimal.valueOf(Double.parseDouble(properties.get("price"))),
+                properties.get("currency"),
+                properties.get("bodyType"),
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(properties.get("created")),
+                Integer.parseInt(properties.get("count")),
+                Integer.parseInt(properties.get("volume")),
+                properties.get("brand"));
+        return auto;
+    }
 
 
     public static void main(String[] args) {
         System.out.println("\n\n\nWelcome to homework #10!\n\nHere will be the list of your vehicles.\n");
         AUTO_SERVICE.createAndSaveAutos(5);
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+        try {
             do {
                 System.out.println("Choose what you want to do:");
                 System.out.println("1. To CREATE the new vehicle");
@@ -211,10 +296,11 @@ public class Main {
                 System.out.println("3. To DELETE one by id ");
                 System.out.println("4. To check comparator's work");
                 System.out.println("5. To PRINT list of existing vehicles");
-                System.out.println("6. to check Tree work example");
-                System.out.println("7. to check Stream API work example");
+                System.out.println("6. To check Tree work example");
+                System.out.println("7. To check Stream API work example");
+                System.out.println("8. To check FileReader example");
                 System.out.println("Choose the action you need (1-7) or 0 to exit:");
-            } while(navigation(reader));
+            } while(navigation());
         } catch (Exception e) {
             System.out.println("Error: " + e);
         }
