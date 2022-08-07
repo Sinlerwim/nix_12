@@ -1,7 +1,10 @@
 package com;
 
 import com.model.*;
-import com.repository.*;
+import com.repository.AutoRepository;
+import com.repository.BinaryTree;
+import com.repository.BusRepository;
+import com.repository.TruckRepository;
 import com.service.*;
 
 import java.io.*;
@@ -26,7 +29,7 @@ public class Main {
             .stream()
             .allMatch(vehicle -> vehicle.getPrice() != null);
 
-    private static final Function<Map<String,Object>, Vehicle> mapToAutoConverter = (map) ->
+    private static final Function<Map<String, Object>, Vehicle> mapToAutoConverter = (map) ->
             new Auto(
                     (String) map.getOrDefault("model", "model-1"),
                     (Manufacturer) map.getOrDefault("manufacturer", Manufacturer.KIA),
@@ -67,7 +70,7 @@ public class Main {
             case "7":
                 streamApiExample();
                 break;
-            case "8" :
+            case "8":
                 fileReaderExample();
                 break;
             case "0":
@@ -91,7 +94,7 @@ public class Main {
                 "Model-" + RANDOM.nextInt(1000),
                 Manufacturer.KIA,
                 BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                RANDOM.nextInt(6,24),
+                RANDOM.nextInt(6, 24),
                 RANDOM.nextInt(1, 20));
     }
 
@@ -133,8 +136,8 @@ public class Main {
         }
         System.out.println("As tree:");
         tree.printToConsole();
-        System.out.println("Sum of left = "+ tree.sumLeft());
-        System.out.println("Sum of right = "+ tree.sumRight());
+        System.out.println("Sum of left = " + tree.sumLeft());
+        System.out.println("Sum of right = " + tree.sumRight());
         System.out.println("Print any symbol to exit");
         READER.readLine();
     }
@@ -166,7 +169,7 @@ public class Main {
         BigDecimal x = BigDecimal.valueOf(Integer.parseInt(READER.readLine()));
         System.out.println("Ok. Here the list of autos which prices higher then " + x);
         vehiclesList.stream()
-                .filter(vehicle-> vehicle.getPrice().compareTo(x) >= 0)
+                .filter(vehicle -> vehicle.getPrice().compareTo(x) >= 0)
                 .forEach(System.out::println);
 
         final Comparator<Vehicle> comparator = Comparator.comparing(vehicle -> vehicle.getClass().getSimpleName());
@@ -186,12 +189,12 @@ public class Main {
         System.out.println("Detail-1 has been added to random vehicle");
         List<String> details = new LinkedList<>();
         details.add("Detail-1");
-        vehiclesList.get(RANDOM.nextInt(0,6)).setDetails(details);
+        vehiclesList.get(RANDOM.nextInt(0, 6)).setDetails(details);
         System.out.println("Is any vehicle in List contains Detail-1?\t" + vehiclesList.stream()
                 .map(Vehicle::getDetails)
 //                .map(List::toArray)
                 .anyMatch((list) -> {
-                    if(list == null) return false;
+                    if (list == null) return false;
                     else return list.contains("Detail-1");
                 }));
         System.out.println("Is all vehicles in List have prices?\t" + IS_ALL_PRICES_EXIST.test(vehiclesList));
@@ -210,42 +213,44 @@ public class Main {
         Map<String, String> properties = new HashMap<String, String>();
         initPropertiesMap(properties);
 
-        final File json = new File("src/main/resources/Auto.json");
-        final File xml = new File("src/main/resources/Auto.xml");
-        try (final BufferedReader fileBufferedReader = new BufferedReader(new FileReader(json))) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream jsonAsInputStream = loader.getResourceAsStream("Auto.json");
+        InputStream xmlAsInputStream = loader.getResourceAsStream("Auto.xml");
+
+        try (final InputStreamReader streamReader = new InputStreamReader(jsonAsInputStream);
+             final BufferedReader fileBufferedReader = new BufferedReader(streamReader)) {
             String line;
             while ((line = fileBufferedReader.readLine()) != null) {
                 final Matcher matcher = JSON_PATTERN.matcher(line);
                 if (matcher.find()) {
                     if (properties.containsKey(matcher.group(1))) {
                         properties.replace(matcher.group(1), matcher.group(2));
-                        System.out.println("JSON: "+matcher.group(1) + '\t' + matcher.group(2));
+                        System.out.println("JSON: " + matcher.group(1) + '\t' + matcher.group(2));
                     }
 
                 }
             }
-
             System.out.println("Created auto depends on json:");
             System.out.println(createAutoFromMap(properties));
-
         } catch (final IOException | ParseException e) {
             e.printStackTrace();
         }
 
         initPropertiesMap(properties);
 
-        try (final BufferedReader fileBufferedReader = new BufferedReader(new FileReader(xml))) {
+        try (final InputStreamReader streamReader = new InputStreamReader(xmlAsInputStream);
+             BufferedReader fileBufferedReader = new BufferedReader(streamReader)) {
             String line;
             while ((line = fileBufferedReader.readLine()) != null) {
                 final Matcher matcher = XML_PATTERN.matcher(line);
                 if (matcher.find()) {
-                        if (properties.containsKey(matcher.group(1))) {
-                            properties.replace(matcher.group(1), matcher.group(4));
-                            System.out.println("XML: "+ matcher.group(1) + '\t' + matcher.group(4));
-                        }
-                        if (properties.containsKey(matcher.group(2))) {
-                            properties.replace(matcher.group(2), matcher.group(3));
-                            System.out.println("XML: "+ matcher.group(2) + '\t' + matcher.group(3));
+                    if (properties.containsKey(matcher.group(1))) {
+                        properties.replace(matcher.group(1), matcher.group(4));
+                        System.out.println("XML: " + matcher.group(1) + '\t' + matcher.group(4));
+                    }
+                    if (properties.containsKey(matcher.group(2))) {
+                        properties.replace(matcher.group(2), matcher.group(3));
+                        System.out.println("XML: " + matcher.group(2) + '\t' + matcher.group(3));
                     }
                 }
             }
@@ -300,7 +305,7 @@ public class Main {
                 System.out.println("7. To check Stream API work example");
                 System.out.println("8. To check FileReader example");
                 System.out.println("Choose the action you need (1-7) or 0 to exit:");
-            } while(navigation());
+            } while (navigation());
         } catch (Exception e) {
             System.out.println("Error: " + e);
         }
