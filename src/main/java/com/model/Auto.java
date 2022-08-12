@@ -1,5 +1,6 @@
 package com.model;
 
+import com.utils.AutoBuilder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +15,7 @@ public class Auto extends Vehicle{
     private Engine engine;
     private String currency;
 
+
     public Auto(String model, Manufacturer manufacturer, BigDecimal price, String currency,
                 String bodyType, Date date, int count, int engineVolume, String engineBrand) {
         super(model, manufacturer, price, count);
@@ -26,6 +28,14 @@ public class Auto extends Vehicle{
     public Auto(String model, Manufacturer manufacturer, BigDecimal price, String bodyType, int count) {
         super(model, manufacturer, price, count);
         this.bodyType = bodyType;
+    }
+
+    public Auto(AutoBuilder builder) {
+        super(builder.getModel(), builder.getManufacturer(), builder.getPrice(), builder.getCount());
+        this.bodyType = builder.getBodyType();
+        this.date = builder.getDate();
+        this.currency = builder.getCurrency();
+        this.engine = builder.getEngine();
     }
 
     @Override

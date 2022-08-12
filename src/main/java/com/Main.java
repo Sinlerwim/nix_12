@@ -6,6 +6,7 @@ import com.repository.BinaryTree;
 import com.repository.BusRepository;
 import com.repository.TruckRepository;
 import com.service.*;
+import com.utils.AutoBuilder;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -72,6 +73,9 @@ public class Main {
                 break;
             case "8":
                 fileReaderExample();
+                break;
+            case "9":
+                autoBuilderExample();
                 break;
             case "0":
                 return false;
@@ -289,6 +293,16 @@ public class Main {
         return auto;
     }
 
+    private static void autoBuilderExample() {
+        AutoBuilder builder = new AutoBuilder("TestModel", Manufacturer.KIA, BigDecimal.TEN, "$");
+        Auto testAuto = builder.bodyType("qwertyuiop[]asdfghjkl;")
+                .count(0)
+                .engine(2, "brand-1")
+                .build();
+        System.out.println("Auto built by builder:");
+        System.out.println(testAuto);
+    }
+
 
     public static void main(String[] args) {
         System.out.println("\n\n\nWelcome to homework #10!\n\nHere will be the list of your vehicles.\n");
@@ -304,72 +318,11 @@ public class Main {
                 System.out.println("6. To check Tree work example");
                 System.out.println("7. To check Stream API work example");
                 System.out.println("8. To check FileReader example");
+                System.out.println("9. To check AutoBuilder example");
                 System.out.println("Choose the action you need (1-7) or 0 to exit:");
             } while (navigation());
         } catch (Exception e) {
             System.out.println("Error: " + e);
         }
-
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-//        AUTO_SERVICE.createAndSaveAutos(5);
-//        AUTO_SERVICE.printAll();
-
-//        System.out.println("findAutoBy !PRICE! OrPrintNew (Existing auto):");
-//        AUTO_SERVICE.findAutoByPriceOrPrintNew(BigDecimal.valueOf(Double.parseDouble(reader.readLine())));
-//        System.out.println("^ Found");
-//
-//        AUTO_SERVICE.printAll();
-//
-//        System.out.println("findAutoByPriceOrPrintNew (Not existing auto):");
-//        AUTO_SERVICE.findAutoByPriceOrPrintNew(BigDecimal.valueOf(Double.parseDouble(reader.readLine())));
-//        System.out.println("^ Printed");
-//
-//        AUTO_SERVICE.printAll();
-//
-//        System.out.println("findAutoByPriceOrCreateNew (Existing auto):");
-//        System.out.println(AUTO_SERVICE.findAutoByPriceOrCreateNew(BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//        System.out.println("^Found");
-//
-//        AUTO_SERVICE.printAll();
-//
-//        System.out.println("findAutoByPriceOrCreateNew (Not existing auto):");
-//        AUTO_SERVICE.create(AUTO_SERVICE.findAutoByPriceOrCreateNew(BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//        System.out.println("Created & Saved");
-//
-//        AUTO_SERVICE.printAll();
-//
-//        System.out.println("findAutoByPriceAndReturnId (Existing)");
-//        System.out.println(AUTO_SERVICE.findAutoByPriceAndReturnId(BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//        reader.readLine();
-//
-//        System.out.println("findAutoByPriceAndReturnId (Not existing)");
-//        System.out.println(AUTO_SERVICE.findAutoByPriceAndReturnId(BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//        reader.readLine();
-//
-//        System.out.println("findAutoByIdOrReturnNew (Existing auto):");
-//        System.out.println(AUTO_SERVICE.findAutoByPriceOrReturnNew(BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//        System.out.println("^ Found");
-//
-//        System.out.println("findAutoByIdOrReturnNew (Not Existing auto):");
-//        System.out.println(AUTO_SERVICE.findAutoByPriceOrReturnNew(BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//        System.out.println("^ Created");
-//
-//        AUTO_SERVICE.printAll();
-//
-//        try {
-//            System.out.println("findAutoByIdAndFilter (Existing auto):");
-//            System.out.println(AUTO_SERVICE.findAutoByIdAndFilter(reader.readLine(), BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//            System.out.println("^ Found");
-//
-//            System.out.println("findAutoByIdOrReturnNew (Not Existing auto):");
-//            System.out.println(AUTO_SERVICE.findAutoByIdAndFilter(reader.readLine(), BigDecimal.valueOf(Double.parseDouble(reader.readLine()))));
-//            System.out.println("^ Created");
-//        } catch (Exception e) {
-//            System.out.println("Error: " + e);
-//        } finally {
-//            AUTO_SERVICE.printAll();
-//        }
-//
-//        reader.readLine();
     }
 }
