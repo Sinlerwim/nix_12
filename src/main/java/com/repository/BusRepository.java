@@ -1,7 +1,9 @@
 package com.repository;
 
-import com.model.Auto;
+import com.annotation.Singleton;
 import com.model.Bus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -9,16 +11,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Singleton
 public class BusRepository implements CrudRepository<Bus> {
 
+    private static BusRepository instance;
     private final List<Bus> buses;
     private static final Logger LOGGER = LoggerFactory.getLogger(BusRepository.class);
 
-    public BusRepository() {
+    private BusRepository() {
         buses = new LinkedList<>();
+    }
+
+    public static BusRepository getInstance() {
+        if (instance == null) {
+            instance = new BusRepository();
+        }
+        return instance;
     }
 
     @Override
