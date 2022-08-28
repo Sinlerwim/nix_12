@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -32,11 +33,12 @@ public abstract class VehicleService<T extends Vehicle> {
     public boolean changePriceById(String id, BigDecimal price) {
         if (price.compareTo(BigDecimal.ZERO) >= 0) {
             return repository.update(id, price);
-        }
-        else {
+        } else {
             return false;
         }
     }
 
     abstract protected boolean delete(String id);
+
+    public abstract Optional<List<T>> findByInvoice(String id);
 }

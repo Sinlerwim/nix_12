@@ -11,17 +11,12 @@ import java.util.Date;
 @Setter
 public class Auto extends Vehicle{
     private String bodyType;
-    private Date date;
-    private Engine engine;
-    private String currency;
 
 
     public Auto(String model, Manufacturer manufacturer, BigDecimal price, String currency,
                 String bodyType, Date date, int count, int engineVolume, String engineBrand) {
         super(model, manufacturer, price, count);
         this.bodyType = bodyType;
-        this.date = date;
-        this.currency = currency;
         this.engine = new Engine(engineVolume, engineBrand);
     }
 
@@ -33,9 +28,12 @@ public class Auto extends Vehicle{
     public Auto(AutoBuilder builder) {
         super(builder.getModel(), builder.getManufacturer(), builder.getPrice(), builder.getCount());
         this.bodyType = builder.getBodyType();
-        this.date = builder.getDate();
-        this.currency = builder.getCurrency();
         this.engine = builder.getEngine();
+    }
+
+    public Auto(String id, String model, Manufacturer manufacturer, BigDecimal price, String bodyType, int count, Date date, Engine engine) {
+        super(id, model, manufacturer, price, count, date, engine);
+        this.bodyType = bodyType;
     }
 
     @Override
@@ -44,10 +42,10 @@ public class Auto extends Vehicle{
                 "bodyType='" + bodyType + '\'' +
                 ", id='" + id + '\'' +
                 ", model='" + model + '\'' +
-                ", price=" + price + currency +
-                ", created=" + date +
+                ", price=" + price +
                 ", manufacturer=" + manufacturer +
                 ", count=" + count +
+                ", created=" + date +
                 ", " + engine +
                 '}';
     }

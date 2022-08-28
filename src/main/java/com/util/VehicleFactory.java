@@ -1,12 +1,13 @@
 package com.util;
 
-import com.model.Vehicle;
-import com.model.VehicleType;
+import com.model.*;
 import com.service.AutoService;
 import com.service.BusService;
 import com.service.TruckService;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public class VehicleFactory {
@@ -26,6 +27,30 @@ public class VehicleFactory {
             instance = new VehicleFactory();
         }
         return instance;
+    }
+
+    public static List<Auto> getAllAutos() {
+        return AUTO_SERVICE.getAll();
+    }
+
+    public static List<Bus> getAllBuses() {
+        return BUS_SERVICE.getAll();
+    }
+
+    public static List<Truck> getAllTrucks() {
+        return TRUCK_SERVICE.getAll();
+    }
+
+    public static Optional<List<Auto>> findAutoByInvoice(String invoiceId) {
+        return AUTO_SERVICE.findByInvoice(invoiceId);
+    }
+
+    public static Optional<List<Bus>> findBusByInvoice(String invoiceId) {
+        return BUS_SERVICE.findByInvoice(invoiceId);
+    }
+
+    public static Optional<List<Truck>> findTruckByInvoice(String invoiceId) {
+        return TRUCK_SERVICE.findByInvoice(invoiceId);
     }
 
     public static Vehicle buildAndSave(VehicleType type) {
@@ -63,6 +88,12 @@ public class VehicleFactory {
         return AUTO_SERVICE.delete(id) |
                 BUS_SERVICE.delete(id) |
                 TRUCK_SERVICE.delete(id);
+    }
+
+    public static void clearAll() {
+        AUTO_SERVICE.clear();
+        BUS_SERVICE.clear();
+        TRUCK_SERVICE.clear();
     }
 
 }
