@@ -8,6 +8,7 @@ import com.model.Truck;
 import com.util.VehicleFactory;
 import lombok.SneakyThrows;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,46 @@ public class DBInvoiceRepository {
             instance = new DBInvoiceRepository();
         }
         return instance;
+    }
+
+    public List<Invoice> getInvoicesExpensiveThan(BigDecimal boundPrice) {
+        final List<Invoice> result = new ArrayList<>();
+        final String invoiceSql = "SELECT * FROM\n" +
+                "(SELECT V.invoice_id, SUM(V.price) as invoice_price \n" +
+                "FROM (SELECT A.invoice_id, A.price\n" +
+                "FROM public.autos as A\n" +
+                "UNION\n" +
+                "SELECT B.invoice_id, B.price\n" +
+                "FROM public.buses as B\n" +
+                "UNION\n" +
+                "SELECT T.invoice_id, T. price\n" +
+                "FROM public.trucks as T) as V\n" +
+                "WHERE V.invoice_id is not null\n" +
+                "GROUP BY V.Invoice_id\n" +
+                "HAVING SUM(V.price) > ?) as S\n" +
+                "INNER JOIN public.invoices\n" +
+                "ON invoices.invoice_id = S.invoice_id;";
+        try (final PreparedStatement preparedStatement = connection.prepareStatement(invoiceSql)) {
+            preparedStatement.setBigDecimal(1, boundPrice);
+            final ResultSet invoiceResultSet = preparedStatement.executeQuery();
+            while (invoiceResultSet.next()) {
+                List<Auto> autos =
+                        VehicleFactory.findAutoByInvoice(invoiceResultSet.getString("invoice_id")).get();
+                List<Bus> buses =
+                        VehicleFactory.findBusByInvoice(invoiceResultSet.getString("invoice_id")).get();
+                List<Truck> trucks =
+                        VehicleFactory.findTruckByInvoice(invoiceResultSet.getString("invoice_id")).get();
+                result.add(new Invoice(invoiceResultSet.getString("invoice_id"),
+                        invoiceResultSet.getDate("created"),
+                        autos,
+                        buses,
+                        trucks));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
     @SneakyThrows
@@ -102,7 +143,6 @@ public class DBInvoiceRepository {
         try (final Statement statement = connection.createStatement()) {
             final ResultSet invoiceResultSet = statement.executeQuery("SELECT * " +
                     "FROM public.invoices as I");
-
             while (invoiceResultSet.next()) {
                 List<Auto> autos =
                         VehicleFactory.findAutoByInvoice(invoiceResultSet.getString("invoice_id")).get();

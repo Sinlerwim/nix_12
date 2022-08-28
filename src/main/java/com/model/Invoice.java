@@ -38,9 +38,9 @@ public class Invoice {
         return "Invoice{" +
                 "id='" + id + '\'' +
                 ", created=" + created +
-                ((autos.isEmpty()) ? "" : ", autos=" + autos) +
-                ((buses.isEmpty()) ? "" : ", buses=" + buses) +
-                ((trucks.isEmpty()) ? "" : ", trucks=" + trucks) +
+                ((autos.isEmpty()) ? " null" : ", autos=" + autos) +
+                ((buses.isEmpty()) ? " null" : ", buses=" + buses) +
+                ((trucks.isEmpty()) ? " null" : ", trucks=" + trucks) +
                 '}';
     }
 }

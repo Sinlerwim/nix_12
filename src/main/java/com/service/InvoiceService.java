@@ -9,6 +9,7 @@ import com.util.VehicleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -38,34 +39,40 @@ public class InvoiceService {
         return invoice;
     }
 
-    public void createAndSave(int count) {
+    public void createAndSave(int numberOfVehiclesInInvoice, int numberOfInvoices) {
         final List<Auto> allAutos = VehicleFactory.getAllAutos();
         final List<Bus> allBuses = VehicleFactory.getAllBuses();
         final List<Truck> allTrucks = VehicleFactory.getAllTrucks();
         List<Auto> autos = new ArrayList<>();
         List<Bus> buses = new ArrayList<>();
         List<Truck> trucks = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            switch (RANDOM.nextInt(1, 3)) {
-                case 1 -> {
-                    int choseAuto = RANDOM.nextInt(0, allAutos.size() - 1);
-                    autos.add(allAutos.get(choseAuto));
-                    allAutos.remove(choseAuto);
-                }
-                case 2 -> {
-                    int choseBus = RANDOM.nextInt(0, allBuses.size() - 1);
-                    buses.add(allBuses.get(choseBus));
-                    allBuses.remove(choseBus);
-                }
-                case 3 -> {
-                    int choseTruck = RANDOM.nextInt(0, allTrucks.size() - 1);
-                    trucks.add(allTrucks.get(choseTruck));
-                    allTrucks.remove(choseTruck);
+        for (int j = 0; j < numberOfInvoices; j++) {
+            for (int i = 0; i < numberOfVehiclesInInvoice; i++) {
+                switch (RANDOM.nextInt(1, 3)) {
+                    case 1 -> {
+                        int choseAuto = RANDOM.nextInt(0, allAutos.size() - 1);
+                        autos.add(allAutos.get(choseAuto));
+                        allAutos.remove(choseAuto);
+                    }
+                    case 2 -> {
+                        int choseBus = RANDOM.nextInt(0, allBuses.size() - 1);
+                        buses.add(allBuses.get(choseBus));
+                        allBuses.remove(choseBus);
+                    }
+                    case 3 -> {
+                        int choseTruck = RANDOM.nextInt(0, allTrucks.size() - 1);
+                        trucks.add(allTrucks.get(choseTruck));
+                        allTrucks.remove(choseTruck);
+                    }
                 }
             }
+            createAndSave(autos, buses, trucks);
+            autos.clear();
+            buses.clear();
+            trucks.clear();
         }
-        createAndSave(autos, buses, trucks);
     }
+
 
     public List<Invoice> getAll() {
         return repository.getAll();
@@ -77,5 +84,11 @@ public class InvoiceService {
 
     public void clearInvoices() {
         repository.clear();
+    }
+
+    public List<Invoice> getInvoicesExpensiveThan(BigDecimal boundPrice) {
+        List<Invoice> result = new ArrayList<>();
+        result.addAll(repository.getInvoicesExpensiveThan(boundPrice));
+        return result;
     }
 }
