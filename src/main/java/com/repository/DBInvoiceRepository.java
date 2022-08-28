@@ -32,20 +32,20 @@ public class DBInvoiceRepository {
 
     public List<Invoice> getInvoicesExpensiveThan(BigDecimal boundPrice) {
         final List<Invoice> result = new ArrayList<>();
-        final String invoiceSql = "SELECT * FROM\n" +
-                "(SELECT V.invoice_id, SUM(V.price) as invoice_price \n" +
-                "FROM (SELECT A.invoice_id, A.price\n" +
-                "FROM public.autos as A\n" +
-                "UNION\n" +
-                "SELECT B.invoice_id, B.price\n" +
-                "FROM public.buses as B\n" +
-                "UNION\n" +
-                "SELECT T.invoice_id, T. price\n" +
-                "FROM public.trucks as T) as V\n" +
-                "WHERE V.invoice_id is not null\n" +
-                "GROUP BY V.Invoice_id\n" +
-                "HAVING SUM(V.price) > ?) as S\n" +
-                "INNER JOIN public.invoices\n" +
+        final String invoiceSql = "SELECT * FROM " +
+                "(SELECT V.invoice_id, SUM(V.price) as invoice_price " +
+                "FROM (SELECT A.invoice_id, A.price " +
+                "FROM public.autos as A " +
+                "UNION " +
+                "SELECT B.invoice_id, B.price " +
+                "FROM public.buses as B " +
+                "UNION " +
+                "SELECT T.invoice_id, T. price " +
+                "FROM public.trucks as T) as V " +
+                "WHERE V.invoice_id is not null " +
+                "GROUP BY V.Invoice_id " +
+                "HAVING SUM(V.price) > ?) as S " +
+                "INNER JOIN public.invoices " +
                 "ON invoices.invoice_id = S.invoice_id;";
         try (final PreparedStatement preparedStatement = connection.prepareStatement(invoiceSql)) {
             preparedStatement.setBigDecimal(1, boundPrice);
