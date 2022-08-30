@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class InvoiceService {
@@ -90,5 +91,18 @@ public class InvoiceService {
         List<Invoice> result = new ArrayList<>();
         result.addAll(repository.getInvoicesExpensiveThan(boundPrice));
         return result;
+    }
+
+    public int getNumberOfInvoices() {
+        return repository.getNumberOfInvoices();
+    }
+
+    public boolean changeInvoiceDate(String invoiceId, String date) {
+        return repository.changeInvoiceDate(invoiceId, date);
+    }
+
+    public void printInvoicesGroupedByPrice() {
+        Map<BigDecimal, Integer> invoices = repository.getInvoicesGroupedByPrice();
+        System.out.println(invoices);
     }
 }

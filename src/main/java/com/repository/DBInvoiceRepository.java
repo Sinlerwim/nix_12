@@ -11,7 +11,9 @@ import lombok.SneakyThrows;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DBInvoiceRepository {
 
@@ -216,5 +218,53 @@ public class DBInvoiceRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @SneakyThrows
+    public int getNumberOfInvoices() {
+        final Statement statement = connection.createStatement();
+        final ResultSet resultSet = statement.executeQuery("SELECT COUNT (public.invoices.invoice_id) " +
+                "FROM public.invoices;");
+        resultSet.next();
+        return resultSet.getInt("count");
+    }
+
+    @SneakyThrows
+    public boolean changeInvoiceDate(String invoiceId, String date) {
+        String sql = "UPDATE public.invoices " +
+                "SET created = ? " +
+                "WHERE invoice_id = ?";
+        final PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setDate(1, Date.valueOf(date));
+        preparedStatement.setString(2, invoiceId);
+        return preparedStatement.executeUpdate() > 0;
+    }
+
+    @SneakyThrows
+    public Map<BigDecimal, Integer> getInvoicesGroupedByPrice() {
+        Statement statement = connection.createStatement();
+        final ResultSet resultSet = statement.executeQuery("SELECT SS.invoice_price, COUNT(SS.invoice_id) FROM\n" +
+                "(SELECT S.invoice_id, S.invoice_price FROM\n" +
+                "(SELECT V.invoice_id, SUM(V.price) as invoice_price \n" +
+                "FROM (SELECT A.invoice_id, A.price\n" +
+                "FROM public.autos as A\n" +
+                "UNION\n" +
+                "SELECT B.invoice_id, B.price\n" +
+                "FROM public.buses as B\n" +
+                "UNION\n" +
+                "SELECT T.invoice_id, T. price\n" +
+                "FROM public.trucks as T) as V\n" +
+                "WHERE V.invoice_id is not null\n" +
+                "GROUP BY V.Invoice_id\n" +
+                "HAVING SUM(V.price) > 0) as S\n" +
+                "INNER JOIN public.invoices\n" +
+                "ON invoices.invoice_id = S.invoice_id) as SS\n" +
+                "GROUP BY SS.invoice_price;");
+        Map<BigDecimal, Integer> invoices = new HashMap<>();
+        while (resultSet.next()) {
+            invoices.put(resultSet.getBigDecimal("invoice_price"),
+                    resultSet.getInt("count"));
+        }
+        return invoices;
     }
 }

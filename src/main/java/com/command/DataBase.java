@@ -28,6 +28,14 @@ public class DataBase implements Command {
         System.out.println(Invoices.size());
         Invoices.forEach(System.out::println);
         BigDecimal boundPrice = new BigDecimal(UserInputUtil.getUserInput("Print the bound price"));
+        System.out.println("Invoices with price higher than " + boundPrice + ":");
         INVOICE_SERVICE.getInvoicesExpensiveThan(boundPrice).forEach(System.out::println);
+        System.out.printf("Number of invoices - %d\n", INVOICE_SERVICE.getNumberOfInvoices());
+        String invoiceId = UserInputUtil.getUserInput("Print invoice id for changing date:");
+        String date = UserInputUtil.getUserInput("Print new date(YYYY-MM-DD):");
+        System.out.println("Is UPDATE successful? " + INVOICE_SERVICE.changeInvoiceDate(invoiceId, date));
+        INVOICE_SERVICE.getAll().forEach(System.out::println);
+        System.out.println("Invoices grouped by price:");
+        INVOICE_SERVICE.printInvoicesGroupedByPrice();
     }
 }
