@@ -2,41 +2,32 @@ package com.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
+@MappedSuperclass
 public abstract class Vehicle {
-    protected final String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    protected String id;
+
     protected String model;
     protected BigDecimal price;
     protected Manufacturer manufacturer;
     protected int count;
     protected Date date;
-    protected List<String> details;
+
+    @ManyToOne
+    @JoinColumn(name = "engine_id")
     protected Engine engine;
 
-    protected Vehicle(String model, Manufacturer manufacturer, BigDecimal price, int count) {
-        this.id = UUID.randomUUID().toString();
-        this.model = model;
-        this.manufacturer = manufacturer;
-        this.price = price;
-        this.count = count;
-        this.details = null;
-    }
-
-    protected Vehicle(String id, String model, Manufacturer manufacturer, BigDecimal price,
-                      int count, Date date, Engine engine) {
-        this.id = id;
-        this.date = date;
-        this.model = model;
-        this.manufacturer = manufacturer;
-        this.price = price;
-        this.count = count;
-        this.engine = engine;
-    }
+    @OneToOne
+    @JoinColumn(name = "invoice_id")
+    protected Invoice invoice;
 }

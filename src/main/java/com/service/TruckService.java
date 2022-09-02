@@ -1,6 +1,5 @@
 package com.service;
 
-import com.model.Manufacturer;
 import com.model.Truck;
 import com.repository.CrudRepository;
 import com.repository.DBTruckRepository;
@@ -25,6 +24,16 @@ public class TruckService extends VehicleService<Truck> {
         return instance;
     }
 
+    public void save(Truck truck) {
+        repository.save(truck);
+    }
+
+    public void printAll() {
+        for (Truck truck : repository.getAll()) {
+            System.out.println(truck);
+        }
+    }
+
     public Optional<List<Truck>> findByInvoice(String id) {
         return repository.findByInvoice(id);
     }
@@ -33,34 +42,18 @@ public class TruckService extends VehicleService<Truck> {
         return repository.getAll();
     }
 
-    public void clear() {
-        repository.clear();
-    }
-
-    public Truck create() {
-        return new Truck(
-                "Model-" + RANDOM.nextInt(1000),
-                Manufacturer.KIA,
-                BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                RANDOM.nextInt(5000, 12000),
-                RANDOM.nextInt(1, 20));
-    }
-
-    public Truck createAndSave() {
-        final Truck truck = create();
-        repository.save(truck);
-        LOGGER.debug("Created truck {}", truck.getId());
+    public Truck getRandomTruck() {
+        Truck truck = new Truck();
+        truck.setModel("Model-" + RANDOM.nextInt(1000));
+        truck.setManufacturer(getRandomManufacturer());
+        truck.setPrice(BigDecimal.valueOf(RANDOM.nextDouble(1000.0)));
+        truck.setAllowTrailerWeight(RANDOM.nextInt(6000, 10000));
+        truck.setCount(RANDOM.nextInt(1, 20));
         return truck;
     }
 
-    public void create(String model, Manufacturer manufacturer, BigDecimal price, int allowTrailerWeight) {
-        repository.save(new Truck(model, manufacturer, price, allowTrailerWeight, 1));
-    }
-
-    public void printAll() {
-        for (Truck truck : repository.getAll()) {
-            System.out.println(truck);
-        }
+    public void clear() {
+        repository.clear();
     }
 
     public boolean changePriceById(String id, BigDecimal price) {

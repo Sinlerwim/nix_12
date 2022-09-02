@@ -1,14 +1,12 @@
 package com.repository;
 
-import com.config.JDBCConfig;
 import com.model.Auto;
 import com.model.Engine;
-import com.model.Manufacturer;
-import lombok.SneakyThrows;
+import com.util.HibernateFactoryUtil;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import java.math.BigDecimal;
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -17,10 +15,10 @@ public class DBAutoRepository implements CrudRepository<Auto> {
 
     private static DBAutoRepository instance;
 
-    private final Connection connection;
+    private static SessionFactory sessionFactory;
 
     private DBAutoRepository() {
-        connection = JDBCConfig.getConnection();
+        sessionFactory = HibernateFactoryUtil.getSessionFactory();
     }
 
     public static DBAutoRepository getInstance() {
@@ -31,100 +29,25 @@ public class DBAutoRepository implements CrudRepository<Auto> {
     }
 
     @Override
-    public Optional<Auto> findById(String id) {
-        final String sql = "SELECT A.*, E.brand, E.volume " +
-                "FROM public.autos as A " +
-                "INNER JOIN public.engines as E " +
-                "ON E.engine_id = A.engine_id";
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, id);
-            final ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return Optional.of(mapRowToAuto(resultSet));
-            } else {
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Optional<List<Auto>> findByInvoice(String id) {
-        final String sql = "SELECT A.*, E.brand, E.volume " +
-                "FROM public.autos as A " +
-                "INNER JOIN public.engines as E " +
-                "ON E.engine_id = A.engine_id " +
-                "WHERE A.invoice_id = ?";
-        List<Auto> result = new ArrayList<>();
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, id);
-            final ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                result.add(mapRowToAuto(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return Optional.of(result);
-    }
-
-    @Override
     public List<Auto> getAll() {
-        final List<Auto> result = new ArrayList<>();
-        try (final Statement statement = connection.createStatement()) {
-            final ResultSet resultSet = statement.executeQuery("SELECT A.*, E.brand, E.volume " +
-                    "FROM public.autos as A " +
-                    "INNER JOIN public.engines as E " +
-                    "ON E.engine_id = A.engine_id");
-            while (resultSet.next()) {
-                result.add(mapRowToAuto(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return result;
+        Session session = sessionFactory.openSession();
+        return session.createQuery("FROM Auto", Auto.class).list();
     }
 
     @Override
-    public boolean save(Auto auto) {
-        if (auto == null) {
-            throw new IllegalArgumentException("Auto must not be null");
-        }
-        if (auto.getPrice().equals(BigDecimal.ZERO)) {
-            auto.setPrice(BigDecimal.valueOf(-1));
-        }
-        final String sql = "INSERT INTO public.autos(id, model, manufacturer, price, " +
-                "body_type, count, created, engine_id)" +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            auto.setEngine(getRandomEngine());
-            mapAutoToRow(preparedStatement, auto);
-            return preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public void save(Auto auto) {
+        auto.setDate(new java.sql.Date(new java.util.Date().getTime()));
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        session.save(auto);
+        session.getTransaction().commit();
+        session.close();
     }
 
     public Engine getRandomEngine() {
-        List<Engine> engines = new ArrayList<>();
-        try (final Statement statement = connection.createStatement()) {
-            final ResultSet resultSet = statement.executeQuery("SELECT * FROM public.engines");
-            while (resultSet.next()) {
-                engines.add(mapRowToEngine(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        Session session = sessionFactory.openSession();
+        List <Engine> engines = session.createQuery("FROM Engine", Engine.class).list();
         return engines.get(new Random().nextInt(0, engines.size() - 1));
-    }
-
-    @SneakyThrows
-    private Engine mapRowToEngine(ResultSet resultSet) {
-        return new Engine(
-                resultSet.getString("engine_id"),
-                resultSet.getInt("volume"),
-                resultSet.getString("brand")
-        );
     }
 
     @Override
@@ -132,41 +55,67 @@ public class DBAutoRepository implements CrudRepository<Auto> {
         return false;
     }
 
-    @SneakyThrows
-    private void mapAutoToRow(final PreparedStatement preparedStatement, final Auto auto) {
-        preparedStatement.setString(1, auto.getId());
-        preparedStatement.setString(2, auto.getModel());
-        preparedStatement.setString(3, auto.getManufacturer().toString());
-        preparedStatement.setBigDecimal(4, auto.getPrice());
-        preparedStatement.setString(5, auto.getBodyType());
-        preparedStatement.setInt(6, auto.getCount());
-        preparedStatement.setDate(7, new java.sql.Date(new java.util.Date().getTime()));
-        preparedStatement.setString(8, auto.getEngine().getId());
+    public void saveAll(List<Auto> autos) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        autos.forEach(session::save);
+        session.getTransaction().commit();
+        session.close();
     }
 
-    @SneakyThrows
-    private Auto mapRowToAuto(final ResultSet resultSet) {
-        return new Auto(
-                resultSet.getString("id"),
-                resultSet.getString("model"),
-                Manufacturer.valueOf(resultSet.getString("manufacturer")),
-                resultSet.getBigDecimal("price"),
-                resultSet.getString("body_type"),
-                resultSet.getInt("count"),
-                resultSet.getDate("created"),
-                new Engine(
-                        resultSet.getString("engine_id"),
-                        resultSet.getInt("volume"),
-                        resultSet.getString("brand")
-                ));
+    @Override
+    public Optional<Auto> findByPrice(BigDecimal price) {
+        return Optional.empty();
     }
 
-    public boolean saveAll(List<Auto> auto) {
-        if (auto == null) {
-            return false;
-        }
-        auto.forEach(this::save);
-        return true;
+    public void clear() {
+        Session session = sessionFactory.openSession();
+        session.createQuery("delete from Auto").executeUpdate();
+        session.close();
+    }
+
+    @Override
+    public Optional<Auto> findById(String id) {
+//        final String sql = "SELECT A.*, E.brand, E.volume " +
+//                "FROM public.autos as A " +
+//                "INNER JOIN public.engines as E " +
+//                "ON E.engine_id = A.engine_id";
+//        try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+//            preparedStatement.setString(1, id);
+//            final ResultSet resultSet = preparedStatement.executeQuery();
+//            if (resultSet.next()) {
+//                return Optional.of(mapRowToAuto(resultSet));
+//            } else {
+        return Optional.empty();
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//        Session session = sessionFactory.openSession();
+//        session.beginTransaction();
+//        session.createQuery("from")
+//        session.getTransaction().commit();
+//        session.close();
+    }
+
+    public Optional<List<Auto>> findByInvoice(String id) {
+//        final String sql = "SELECT A.*, E.brand, E.volume " +
+//                "FROM public.autos as A " +
+//                "INNER JOIN public.engines as E " +
+//                "ON E.engine_id = A.engine_id " +
+//                "WHERE A.invoice_id = ?";
+//        List<Auto> result = new ArrayList<>();
+//        try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+//            preparedStatement.setString(1, id);
+//            final ResultSet resultSet = preparedStatement.executeQuery();
+//            while (resultSet.next()) {
+//                result.add(mapRowToAuto(resultSet));
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return Optional.of(result);
+        return Optional.empty();
     }
 
     public boolean update(Auto auto) {
@@ -189,19 +138,5 @@ public class DBAutoRepository implements CrudRepository<Auto> {
             }
         }*/
         return false;
-    }
-
-    @Override
-    public Optional<Auto> findByPrice(BigDecimal price) {
-        return Optional.empty();
-    }
-
-    public void clear() {
-        final String sql = "DELETE FROM public.autos";
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

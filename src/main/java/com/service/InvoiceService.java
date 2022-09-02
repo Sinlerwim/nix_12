@@ -1,9 +1,7 @@
 package com.service;
 
-import com.model.Auto;
-import com.model.Bus;
 import com.model.Invoice;
-import com.model.Truck;
+import com.model.Vehicle;
 import com.repository.DBInvoiceRepository;
 import com.util.VehicleFactory;
 import org.slf4j.Logger;
@@ -11,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 public class InvoiceService {
@@ -33,44 +31,24 @@ public class InvoiceService {
         return instance;
     }
 
-    public Invoice createAndSave(List<Auto> autos, List<Bus> buses, List<Truck> trucks) {
-        final Invoice invoice = new Invoice(autos, buses, trucks);
-        repository.save(invoice);
+    public Invoice saveRandomInvoice(List<Vehicle> vehicles) {
+        final Invoice invoice = new Invoice();
+        repository.save(invoice, vehicles);
         LOGGER.debug("Created invoice {}", invoice.getId());
         return invoice;
     }
 
-    public void createAndSave(int numberOfVehiclesInInvoice, int numberOfInvoices) {
-        final List<Auto> allAutos = VehicleFactory.getAllAutos();
-        final List<Bus> allBuses = VehicleFactory.getAllBuses();
-        final List<Truck> allTrucks = VehicleFactory.getAllTrucks();
-        List<Auto> autos = new ArrayList<>();
-        List<Bus> buses = new ArrayList<>();
-        List<Truck> trucks = new ArrayList<>();
+    public void saveRandomInvoices(int numberOfVehiclesInInvoice, int numberOfInvoices) {
+        List<Vehicle> allVehicles = VehicleFactory.getAll();
+        List<Vehicle> invoiceVehicles = new LinkedList<>();
         for (int j = 0; j < numberOfInvoices; j++) {
             for (int i = 0; i < numberOfVehiclesInInvoice; i++) {
-                switch (RANDOM.nextInt(1, 3)) {
-                    case 1 -> {
-                        int choseAuto = RANDOM.nextInt(0, allAutos.size() - 1);
-                        autos.add(allAutos.get(choseAuto));
-                        allAutos.remove(choseAuto);
-                    }
-                    case 2 -> {
-                        int choseBus = RANDOM.nextInt(0, allBuses.size() - 1);
-                        buses.add(allBuses.get(choseBus));
-                        allBuses.remove(choseBus);
-                    }
-                    case 3 -> {
-                        int choseTruck = RANDOM.nextInt(0, allTrucks.size() - 1);
-                        trucks.add(allTrucks.get(choseTruck));
-                        allTrucks.remove(choseTruck);
-                    }
-                }
+                int choseAuto = RANDOM.nextInt(0, allVehicles.size() - 1);
+                invoiceVehicles.add(allVehicles.get(choseAuto));
+                allVehicles.remove(choseAuto);
             }
-            createAndSave(autos, buses, trucks);
-            autos.clear();
-            buses.clear();
-            trucks.clear();
+            saveRandomInvoice(invoiceVehicles);
+            invoiceVehicles.clear();
         }
     }
 
@@ -79,9 +57,9 @@ public class InvoiceService {
         return repository.getAll();
     }
 
-    public boolean deleteInvoiceById(String invoiceId) {
-        return repository.deleteInvoiceById(invoiceId);
-    }
+//            public boolean deleteInvoiceById (String invoiceId){
+//                return repository.deleteInvoiceById(invoiceId);
+//            }
 
     public void clearInvoices() {
         repository.clear();
@@ -97,12 +75,11 @@ public class InvoiceService {
         return repository.getNumberOfInvoices();
     }
 
-    public boolean changeInvoiceDate(String invoiceId, String date) {
-        return repository.changeInvoiceDate(invoiceId, date);
+    public void changeInvoiceDate(String invoiceId, String date) {
+        repository.changeInvoiceDate(invoiceId, date);
     }
 
     public void printInvoicesGroupedByPrice() {
-        Map<BigDecimal, Integer> invoices = repository.getInvoicesGroupedByPrice();
-        System.out.println(invoices);
+        repository.getInvoicesGroupedByPrice().forEach(System.out::println);
     }
 }
