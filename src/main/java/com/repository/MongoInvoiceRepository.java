@@ -3,8 +3,11 @@ package com.repository;
 import com.google.gson.*;
 import com.model.Invoice;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Filters;
 import lombok.SneakyThrows;
 import org.bson.Document;
@@ -14,9 +17,9 @@ import org.bson.types.ObjectId;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+
+import static com.mongodb.client.model.Aggregates.group;
 
 
 public class MongoInvoiceRepository {
@@ -144,8 +147,15 @@ public class MongoInvoiceRepository {
     }
 
     @SneakyThrows
-    public List<Invoice> getInvoicesGroupedByPrice() {
-//        Set set = collection.find().map(i -> i.get("price")).into(Set.class)
-        return null;
+    public Map<BigDecimal, Integer> getInvoicesGroupedByPrice() {
+        Map<BigDecimal, Integer> groupedPrices = new HashMap<>();
+        AggregateIterable<Document> aggregateIterable = collection.aggregate(Arrays.asList(
+                group("$price", Accumulators.sum("numberOfInvoices", 1))));
+        MongoCursor<Document> iterator = aggregateIterable.iterator();
+        while (iterator.hasNext()) {
+            Document line = iterator.next();
+            groupedPrices.put(BigDecimal.valueOf(line.get(("_id"), Double.class)), line.get("numberOfInvoices", Integer.class));
+        }
+        return groupedPrices;
     }
 }

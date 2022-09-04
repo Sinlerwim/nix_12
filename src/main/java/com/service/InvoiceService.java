@@ -82,6 +82,6 @@ public class InvoiceService {
     }
 
     public void printInvoicesGroupedByPrice() {
-        repository.getInvoicesGroupedByPrice().forEach(System.out::println);
+        System.out.println(repository.getInvoicesGroupedByPrice());
     }
 }
