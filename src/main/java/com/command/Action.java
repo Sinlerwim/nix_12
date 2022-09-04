@@ -15,6 +15,7 @@ public enum Action {
     FILE_READER("Read data from file", new ReadFromFile()),
     AUTO_BUILDER("Show auto builder example", new ShowAutoBuilder()),
     ANNOTATION("Show annotation example", new Annotation()),
+    JDBC("Show JDBC work", new DataBase()),
     EXIT("Exit", null);
 
 

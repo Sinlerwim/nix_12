@@ -3,9 +3,11 @@ package com.service;
 import com.model.Manufacturer;
 import com.model.Truck;
 import com.repository.CrudRepository;
-import com.repository.TruckRepository;
+import com.repository.DBTruckRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 public class TruckService extends VehicleService<Truck> {
 
@@ -18,9 +20,21 @@ public class TruckService extends VehicleService<Truck> {
 
     public static TruckService getInstance() {
         if (instance == null) {
-            instance = new TruckService(TruckRepository.getInstance());
+            instance = new TruckService(DBTruckRepository.getInstance());
         }
         return instance;
+    }
+
+    public Optional<List<Truck>> findByInvoice(String id) {
+        return repository.findByInvoice(id);
+    }
+
+    public List<Truck> getAll() {
+        return repository.getAll();
+    }
+
+    public void clear() {
+        repository.clear();
     }
 
     public Truck create() {

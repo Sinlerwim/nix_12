@@ -8,6 +8,13 @@ import lombok.Setter;
 public class Engine {
     private int volume;
     private String brand;
+    private String id;
+
+    public Engine(String id, int volume, String brand) {
+        this.id = id;
+        this.volume = volume;
+        this.brand = brand;
+    }
 
     public Engine(int volume, String brand) {
         this.volume = volume;

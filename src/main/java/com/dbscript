@@ -1,0 +1,89 @@
+create table if not exists engines
+(
+    engine_id varchar not null
+        constraint engines_pk
+            primary key,
+    brand     varchar not null,
+    volume    integer not null
+);
+
+alter table engines
+    owner to postgres;
+
+create table if not exists invoices
+(
+    invoice_id varchar not null
+        constraint invoice_pk
+            primary key,
+    created    date
+);
+
+alter table invoices
+    owner to postgres;
+
+create table if not exists autos
+(
+    id           varchar           not null
+        constraint auto_pk
+            primary key,
+    model        varchar,
+    manufacturer varchar,
+    price        numeric default 0 not null,
+    body_type    varchar,
+    count        integer default 1 not null,
+    created      date,
+    engine_id    varchar
+        constraint engine_id
+            references engines,
+    invoice_id   varchar
+        constraint invoice_id
+            references invoices
+);
+
+alter table autos
+    owner to postgres;
+
+create table if not exists buses
+(
+    bus_id          varchar not null
+        constraint buses_pk
+            primary key,
+    model           varchar,
+    manufacturer    varchar,
+    price           numeric,
+    number_of_seats integer,
+    count           integer,
+    created         date,
+    engine_id       varchar
+        constraint engine_id
+            references engines,
+    invoice_id      varchar
+        constraint "invoice_ID"
+            references invoices
+);
+
+alter table buses
+    owner to postgres;
+
+create table if not exists trucks
+(
+    truck_id             varchar not null
+        constraint trucks_pk
+            primary key,
+    model                varchar,
+    manufacturer         varchar,
+    price                numeric,
+    allow_trailer_weight varchar,
+    count                integer,
+    created              date,
+    engine_id            varchar
+        constraint engine_id
+            references engines,
+    invoice_id           varchar
+        constraint invoice_id
+            references invoices
+);
+
+alter table trucks
+    owner to postgres;
+
