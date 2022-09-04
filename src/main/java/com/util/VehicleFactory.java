@@ -1,6 +1,10 @@
 package com.util;
 
 import com.model.*;
+import com.mongodb.client.MongoDatabase;
+import com.repository.MongoAutoRepository;
+import com.repository.MongoBusRepository;
+import com.repository.MongoTruckRepository;
 import com.service.AutoService;
 import com.service.BusService;
 import com.service.EngineService;
@@ -15,10 +19,11 @@ import java.util.Random;
 public class VehicleFactory {
     private static VehicleFactory instance;
 
-    private static final AutoService AUTO_SERVICE = AutoService.getInstance();
-    private static final BusService BUS_SERVICE = BusService.getInstance();
-    private static final TruckService TRUCK_SERVICE = TruckService.getInstance();
-    private static final EngineService ENGINE_SERVICE = EngineService.getInstance();
+    private static final MongoDatabase db = MongoUtil.connect("NIX");
+    private static final AutoService AUTO_SERVICE = new AutoService(new MongoAutoRepository(db));
+    private static final BusService BUS_SERVICE = new BusService(new MongoBusRepository(db));
+    private static final TruckService TRUCK_SERVICE = new TruckService(new MongoTruckRepository(db));
+    private static final EngineService ENGINE_SERVICE = new EngineService();
 
     private static final Random RANDOM = new Random();
 
@@ -33,16 +38,19 @@ public class VehicleFactory {
     }
 
     public static List<Vehicle> getAll() {
-        return new ArrayList<>(AUTO_SERVICE.getAll());
+        ArrayList<Vehicle> vehicles = new ArrayList<>(AUTO_SERVICE.getAll());
+        vehicles.addAll(BUS_SERVICE.getAll());
+        vehicles.addAll(TRUCK_SERVICE.getAll());
+        return vehicles;
     }
 
-//    public static List<Bus> getAllBuses() {
-//        return BUS_SERVICE.getAll();
-//    }
-//
-//    public static List<Truck> getAllTrucks() {
-//        return TRUCK_SERVICE.getAll();
-//    }
+    public static List<Bus> getAllBuses() {
+        return BUS_SERVICE.getAll();
+    }
+
+    public static List<Truck> getAllTrucks() {
+        return TRUCK_SERVICE.getAll();
+    }
 
     public static Optional<List<Auto>> findAutoByInvoice(String invoiceId) {
         return AUTO_SERVICE.findByInvoice(invoiceId);
@@ -58,20 +66,17 @@ public class VehicleFactory {
 
     public static void saveRandomVehicles(int count) {
         for(int i = 0; i < count; i++) {
-            switch (RANDOM.nextInt(1, 3)) {
+            switch (RANDOM.nextInt(1, 4)) {
                 case 1 -> {
                     Auto auto = AUTO_SERVICE.getRandomAuto();
-                    auto.setEngine(ENGINE_SERVICE.getRandomEngineFromDB());
                     AUTO_SERVICE.save(auto);
                 }
                 case 2 -> {
                     Bus bus = BUS_SERVICE.getRandomBus();
-                    bus.setEngine(ENGINE_SERVICE.getRandomEngineFromDB());
                     BUS_SERVICE.save(bus);
                 }
                 case 3 -> {
                     Truck truck = TRUCK_SERVICE.getRandomTruck();
-                    truck.setEngine(ENGINE_SERVICE.getRandomEngineFromDB());
                     TRUCK_SERVICE.save(truck);
                 }
             }

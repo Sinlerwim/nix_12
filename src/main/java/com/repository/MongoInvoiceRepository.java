@@ -1,63 +1,78 @@
 package com.repository;
 
+import com.google.gson.*;
 import com.model.Invoice;
-import com.model.Vehicle;
-import com.util.HibernateFactoryUtil;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import lombok.SneakyThrows;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 
-import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
-public class DBInvoiceRepository {
+public class MongoInvoiceRepository {
 
-    private static DBInvoiceRepository instance;
+    private static Gson gson;
 
-    private static SessionFactory sessionFactory;
+    private final MongoDatabase db;
 
-    private DBInvoiceRepository() {
-        sessionFactory = HibernateFactoryUtil.getSessionFactory();
+    private final MongoCollection<Document> collection;
+
+    private final String COLLECTION_NAME = "Invoice";
+
+    public MongoInvoiceRepository(MongoDatabase db) {
+        this.db = db;
+        this.collection = db.getCollection(COLLECTION_NAME);
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>)
+                        (localDateTime, type, jsonSerializationContext) ->
+                                new JsonPrimitive(localDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE)))
+                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>)
+                        (json, type, jsonSerializationContext) -> LocalDateTime.parse(json.getAsString() + " 00:00",
+                                DateTimeFormatter.ofPattern("yyy-MM-dd HH:mm").withLocale(Locale.ENGLISH)))
+                .create();
     }
 
-    public static DBInvoiceRepository getInstance() {
-        if (instance == null) {
-            instance = new DBInvoiceRepository();
-        }
-        return instance;
+    protected static Document mapFrom(Invoice invoice) {
+        return Document.parse(gson.toJson(invoice));
     }
 
     public List<Invoice> getInvoicesExpensiveThan(BigDecimal boundPrice) {
-        Session session = sessionFactory.openSession();
-        Query q = session.createNamedQuery("selectInvoiceExpensiveThat");
-        q.setParameter("boundPrice", boundPrice);
-        return q.getResultList();
+//        Document filter = new Document();
+//        filter.append("price", "$gt"+boundPrice);
+        Bson filter = Filters.gt("price", boundPrice);
+        return collection.find(filter)
+                .map(item -> {
+                    Invoice invoice = gson.fromJson(item.toJson(), Invoice.class);
+                    invoice.setId(item.get("_id", ObjectId.class).toString());
+                    return invoice;
+                })
+                .into(new ArrayList<>());
     }
 
     @SneakyThrows
-    public void save(Invoice invoice, List<Vehicle> vehicles) {
-        if (invoice == null) {
-            throw new IllegalArgumentException("Invoice must not be null");
-        }
-
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        invoice.setCreated(LocalDateTime.now());
-        session.save(invoice);
-        vehicles.forEach(vehicle -> {
-            vehicle.setInvoice(invoice);
-            session.update(vehicle);
-        });
-        session.getTransaction().commit();
-        session.close();
+    public void save(Invoice invoice) {
+        invoice.setDate(LocalDateTime.now());
+        collection.insertOne(mapFrom(invoice));
     }
 
     public List<Invoice> getAll() {
-        Session session = sessionFactory.openSession();
-        return session.createQuery("FROM Invoice ", Invoice.class).list();
+        return collection.find()
+                .map(item -> {
+                    Invoice invoice = gson.fromJson(item.toJson(), Invoice.class);
+                    invoice.setId(item.get("_id", ObjectId.class).toString());
+                    return invoice;
+                })
+                .into(new ArrayList<>());
     }
 
     public boolean deleteInvoiceById(String id) {
@@ -117,25 +132,20 @@ public class DBInvoiceRepository {
 
     @SneakyThrows
     public int getNumberOfInvoices() {
-        Session session = sessionFactory.openSession();
-        return ((Long) session.createQuery("select count(*) from Invoice").getSingleResult()).intValue();
+        return (int) collection.countDocuments();
     }
 
     @SneakyThrows
     public void changeInvoiceDate(String invoiceId, String date) {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        Invoice invoice = session.get(Invoice.class, invoiceId);
-        invoice.setCreated(LocalDateTime.parse(date));
-        session.update(invoice);
-        session.getTransaction().commit();
-        session.close();
+        collection.updateOne(
+                new BasicDBObject("_id", new ObjectId(invoiceId)),
+                new BasicDBObject("$set", new BasicDBObject("date", LocalDateTime.parse(date)))
+        );
     }
 
     @SneakyThrows
     public List<Invoice> getInvoicesGroupedByPrice() {
-        Session session = sessionFactory.openSession();
-        Query q = session.createNamedQuery("invoicesGroupedBySum");
-        return q.getResultList();
+//        Set set = collection.find().map(i -> i.get("price")).into(Set.class)
+        return null;
     }
 }

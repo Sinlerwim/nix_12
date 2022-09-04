@@ -1,49 +1,53 @@
 package com;
 
-import com.config.JDBCConfig;
-import com.service.InvoiceService;
+import com.model.Invoice;
+import com.mongodb.client.MongoDatabase;
+import com.repository.MongoAutoRepository;
+import com.repository.MongoBusRepository;
+import com.repository.MongoInvoiceRepository;
+import com.repository.MongoTruckRepository;
+import com.service.*;
+import com.util.MongoUtil;
+import com.util.UserInputUtil;
 import com.util.VehicleFactory;
 import lombok.SneakyThrows;
 
-import java.sql.Connection;
-import java.sql.Statement;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Random;
 
 public class Test {
-    private static final InvoiceService INVOICE_SERVICE = InvoiceService.getInstance();
     private static final Random RANDOM = new Random();
 
+    private static final MongoDatabase db = MongoUtil.connect("NIX");
+
+    private static final AutoService AUTO_SERVICE = new AutoService(new MongoAutoRepository(db));
+    private static final BusService BUS_SERVICE = new BusService(new MongoBusRepository(db));
+    private static final TruckService TRUCK_SERVICE = new TruckService(new MongoTruckRepository(db));
+
+    private static final EngineService ENGINE_SERVICE = new EngineService();
+
+    private static final InvoiceService INVOICE_SERVICE = new InvoiceService(new MongoInvoiceRepository(db));
 
     @SneakyThrows
     public static void main(String[] args) {
-        final Connection connection = JDBCConfig.getConnection();
-        final Statement statement = connection.createStatement();
-        final boolean select = statement.execute("SELECT * FROM public.autos");
-        System.out.println("Result " + select);
-
-//        final String sql = "SELECT * FROM public.\"Auto\"";
-//        final PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        System.out.println("Before deleting:");
-        VehicleFactory.printAll();
-        System.out.println(INVOICE_SERVICE.getAll());
-
-//        VehicleFactory.clearAll();
-        System.out.println("After deleting:");
-//        INVOICE_SERVICE.clearInvoices();
-        System.out.println(INVOICE_SERVICE.getAll());
-//        VehicleFactory.printAll();
-//        VehicleFactory.buildAndSave(VehicleType.AUTO);
-//        VehicleFactory.buildAndSave(VehicleType.AUTO);
-//        VehicleFactory.buildAndSave(VehicleType.AUTO);
-//        VehicleFactory.buildAndSave(VehicleType.BUS);
-//        VehicleFactory.buildAndSave(VehicleType.BUS);
-//        VehicleFactory.buildAndSave(VehicleType.BUS);
-//        VehicleFactory.buildAndSave(VehicleType.TRUCK);
-//        VehicleFactory.buildAndSave(VehicleType.TRUCK);
-//        VehicleFactory.buildAndSave(VehicleType.TRUCK);
-        System.out.println("After creating: ");
-        VehicleFactory.printAll();
+        db.drop();
+        VehicleFactory.saveRandomVehicles(30);
+        INVOICE_SERVICE.saveRandomInvoices(3, 5);
+        System.out.println("Created invoices:");
+        List<Invoice> Invoices = INVOICE_SERVICE.getAll();
+        System.out.println("Amount - " + INVOICE_SERVICE.getNumberOfInvoices());
+        Invoices.forEach(System.out::println);
+        BigDecimal boundPrice = new BigDecimal(UserInputUtil.getUserInput("Print the bound price"));
+        System.out.println("Result:");
+        INVOICE_SERVICE.getInvoicesExpensiveThan(boundPrice).forEach(System.out::println);
+        String invoiceId = UserInputUtil.getUserInput("Print id of invoice you want to change:");
+        String date = UserInputUtil.getUserInput("Print new date:");
+        INVOICE_SERVICE.changeInvoiceDate(invoiceId, date);
         System.out.println("Invoices:");
-        System.out.println(INVOICE_SERVICE.getAll());
+        INVOICE_SERVICE.getAll().forEach(System.out::println);
+        System.out.println("Invoices grouped by price:");
+        INVOICE_SERVICE.printInvoicesGroupedByPrice();
     }
+
 }

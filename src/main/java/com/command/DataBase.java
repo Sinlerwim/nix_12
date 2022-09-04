@@ -10,20 +10,36 @@ package com.command;
 //import java.util.List;
 
 import com.model.Invoice;
-import com.service.EngineService;
-import com.service.InvoiceService;
+import com.mongodb.client.MongoDatabase;
+import com.repository.MongoAutoRepository;
+import com.repository.MongoBusRepository;
+import com.repository.MongoInvoiceRepository;
+import com.repository.MongoTruckRepository;
+import com.service.*;
+import com.util.MongoUtil;
 import com.util.UserInputUtil;
 import com.util.VehicleFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Random;
 
 public class DataBase implements Command {
+    private static final Random RANDOM = new Random();
+
+    private static final MongoDatabase db = MongoUtil.connect("NIX");
+
+    private static final AutoService AUTO_SERVICE = new AutoService(new MongoAutoRepository(db));
+    private static final BusService BUS_SERVICE = new BusService(new MongoBusRepository(db));
+    private static final TruckService TRUCK_SERVICE = new TruckService(new MongoTruckRepository(db));
+
     private static final EngineService ENGINE_SERVICE = new EngineService();
 
-    private static final InvoiceService INVOICE_SERVICE = InvoiceService.getInstance();
+    private static final InvoiceService INVOICE_SERVICE = new InvoiceService(new MongoInvoiceRepository(db));
+
     @Override
     public void execute() {
+        db.drop();
         ENGINE_SERVICE.initEnginesDB(5);
         VehicleFactory.saveRandomVehicles(50);
         INVOICE_SERVICE.saveRandomInvoices(3, 5);
