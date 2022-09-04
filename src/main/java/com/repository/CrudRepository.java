@@ -12,7 +12,7 @@ public interface CrudRepository<T> {
 
     List<T> getAll();
 
-    boolean save(T vehicle) throws IllegalArgumentException;
+    void save(T vehicle) throws IllegalArgumentException;
 
     boolean update(String id, BigDecimal price);
 
