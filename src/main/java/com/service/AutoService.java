@@ -1,28 +1,31 @@
 package com.service;
 
+import com.annotation.Autowired;
+import com.annotation.Singleton;
 import com.model.Auto;
 import com.model.Manufacturer;
 import com.repository.AutoRepository;
 
-import com.repository.CrudRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
+@Singleton
 public class AutoService extends VehicleService<Auto> {
 
-    public AutoService(CrudRepository<Auto> autoRepository) {
-        super(autoRepository);
+    private static AutoService instance;
+
+    public static AutoService getInstance() {
+        if (instance == null) {
+            instance = new AutoService(AutoRepository.getInstance());
+        }
+        return instance;
     }
 
-//    public AutoService() {
-//        AUTO_REPOSITORY = new AutoRepository();
-//    }
+    @Autowired
+    private AutoService(AutoRepository autoRepository) {
+        super(autoRepository);
+    }
 
     public void create(String model, Manufacturer manufacturer, BigDecimal price, String bodyType, int count) {
         repository.save(new Auto(model, manufacturer, price, bodyType, count));
@@ -38,36 +41,26 @@ public class AutoService extends VehicleService<Auto> {
         }
     }
 
-    public List<Auto> createAndSaveAutos(int count) {
-        List<Auto> result = new LinkedList<>();
-        for (int i = 0; i < count; i++) {
-            final Auto auto = new Auto(
-                    "Model-" + RANDOM.nextInt(1000),
-                    getRandomManufacturer(),
-                    BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20)
-            );
-            result.add(auto);
-            repository.save(auto);
-            LOGGER.debug("Created auto {}", auto.getId());
-        }
-        return result;
+    public Auto create() {
+        return new Auto(
+                "Model-" + RANDOM.nextInt(1000),
+                getRandomManufacturer(),
+                BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
+                "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20)
+        );
     }
 
-    public Auto createAndReturn() {
-        return new Auto(
-                    "Model-" + RANDOM.nextInt(1000),
-                    getRandomManufacturer(),
-                    BigDecimal.valueOf(RANDOM.nextDouble(1000.0)),
-                    "Model-" + RANDOM.nextInt(1000), RANDOM.nextInt(1, 20)
-            );
+    public Auto createAndSave() {
+        final Auto auto = create();
+        repository.save(auto);
+        LOGGER.debug("Created auto {}", auto.getId());
+        return auto;
     }
 
     public boolean changePriceById(String id, BigDecimal price) {
         if (price.compareTo(BigDecimal.ZERO) >= 0) {
             return repository.update(id, price);
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -89,7 +82,7 @@ public class AutoService extends VehicleService<Auto> {
     }
 
     public void printSumAllPrices() {
-        System.out.println("Sum of all prices = " + getSumAllPrices());;
+        System.out.println("Sum of all prices = " + getSumAllPrices());
     }
 
     public void findAutoByIdAndPrint(String id) {
@@ -106,7 +99,7 @@ public class AutoService extends VehicleService<Auto> {
     }
 
     public Auto findAutoByPriceOrCreateNew(BigDecimal price) {
-        Optional<Auto> foundAuto = Optional.of(repository.findByPrice(price).orElseGet(this::createAndReturn));
+        Optional<Auto> foundAuto = Optional.of(repository.findByPrice(price).orElseGet(this::create));
         return foundAuto.get();
     }
 

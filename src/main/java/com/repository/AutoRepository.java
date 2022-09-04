@@ -1,6 +1,8 @@
 package com.repository;
 
 import com.model.Auto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -8,17 +10,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.swing.text.html.Option;
 
 public class AutoRepository implements CrudRepository<Auto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoRepository.class);
+    private static AutoRepository instance;
     private final List<Auto> autos;
 
-    public AutoRepository() {
+    private AutoRepository() {
         autos = new LinkedList<>();
+    }
+
+    public static AutoRepository getInstance() {
+        if (instance == null) {
+            instance = new AutoRepository();
+        }
+        return instance;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.model;
 
-import com.utils.AutoBuilder;
+import com.util.AutoBuilder;
 import lombok.Getter;
 import lombok.Setter;
 

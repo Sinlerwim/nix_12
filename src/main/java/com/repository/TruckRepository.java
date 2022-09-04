@@ -1,7 +1,9 @@
 package com.repository;
 
-import com.model.Auto;
+import com.annotation.Singleton;
 import com.model.Truck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -9,21 +11,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class TruckRepository implements CrudRepository<Truck>{
+@Singleton
+public class TruckRepository implements CrudRepository<Truck> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TruckRepository.class);
+    private static TruckRepository instance;
     private final List<Truck> trucks;
 
-    public TruckRepository() {
+    private TruckRepository() {
         trucks = new LinkedList<>();
+    }
+
+    public static TruckRepository getInstance() {
+        if (instance == null) {
+            instance = new TruckRepository();
+        }
+        return instance;
     }
 
     @Override
     public Optional<Truck> findById(String id) {
-        for (Truck truck : trucks){
+        for (Truck truck : trucks) {
             if (truck.getId().equals(id)) {
                 return Optional.of(truck);
             }
