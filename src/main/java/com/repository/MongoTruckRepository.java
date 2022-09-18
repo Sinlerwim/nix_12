@@ -1,54 +1,41 @@
 package com.repository;
 
 import com.model.Auto;
-import com.model.Engine;
 import com.model.Truck;
-import com.util.HibernateFactoryUtil;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import com.mongodb.client.MongoDatabase;
+import org.bson.types.ObjectId;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
-public class DBTruckRepository implements CrudRepository<Truck> {
+public class MongoTruckRepository extends CrudRepository<Truck> {
 
-    private static DBTruckRepository instance;
+    private static final String COLLECTION_NAME = "Truck";
 
-    private static SessionFactory sessionFactory;
+//    private static SessionFactory sessionFactory;
 
-    private DBTruckRepository() {
-        sessionFactory = HibernateFactoryUtil.getSessionFactory();
-    }
-
-    public static DBTruckRepository getInstance() {
-        if (instance == null) {
-            instance = new DBTruckRepository();
-        }
-        return instance;
+    public MongoTruckRepository(MongoDatabase db) {
+        super(db, COLLECTION_NAME);
     }
 
     @Override
     public List<Truck> getAll() {
-        Session session = sessionFactory.openSession();
-        return session.createQuery("FROM Truck ", Truck.class).list();
+        return collection.find()
+                .map(item -> {
+                    Truck truck = gson.fromJson(item.toJson(), Truck.class);
+                    truck.setId(item.get("_id", ObjectId.class).toString());
+                    return truck;
+                })
+                .into(new ArrayList<>());
     }
 
     @Override
     public void save(Truck truck) {
-        truck.setDate(new java.sql.Date(new java.util.Date().getTime()));
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        session.save(truck);
-        session.getTransaction().commit();
-        session.close();
-    }
-
-    public Engine getRandomEngine() {
-        Session session = sessionFactory.openSession();
-        List <Engine> engines = session.createQuery("FROM Engine", Engine.class).list();
-        return engines.get(new Random().nextInt(0, engines.size() - 1));
+        truck.setDate(LocalDateTime.now());
+        collection.insertOne(mapFrom(truck));
     }
 
     @Override
@@ -62,9 +49,9 @@ public class DBTruckRepository implements CrudRepository<Truck> {
     }
 
     public void clear() {
-        Session session = sessionFactory.openSession();
-        session.createQuery("delete from Truck ").executeUpdate();
-        session.close();
+//        Session session = sessionFactory.openSession();
+//        session.createQuery("delete from Truck ").executeUpdate();
+//        session.close();
     }
 
     @Override

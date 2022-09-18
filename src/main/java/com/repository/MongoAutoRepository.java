@@ -1,53 +1,44 @@
 package com.repository;
 
 import com.model.Auto;
-import com.model.Engine;
-import com.util.HibernateFactoryUtil;
+import com.mongodb.client.MongoDatabase;
+import org.bson.types.ObjectId;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
-public class DBAutoRepository implements CrudRepository<Auto> {
+public class MongoAutoRepository extends CrudRepository<Auto> {
 
-    private static DBAutoRepository instance;
+    private static final String COLLECTION_NAME = "Auto";
 
     private static SessionFactory sessionFactory;
 
-    private DBAutoRepository() {
-        sessionFactory = HibernateFactoryUtil.getSessionFactory();
+    public MongoAutoRepository(MongoDatabase db) {
+        super(db, COLLECTION_NAME);
     }
 
-    public static DBAutoRepository getInstance() {
-        if (instance == null) {
-            instance = new DBAutoRepository();
-        }
-        return instance;
-    }
 
     @Override
     public List<Auto> getAll() {
-        Session session = sessionFactory.openSession();
-        return session.createQuery("FROM Auto", Auto.class).list();
+        return collection.find()
+                .map(item -> {
+                    Auto auto = gson.fromJson(item.toJson(), Auto.class);
+                    auto.setId(item.get("_id", ObjectId.class).toString());
+                    return auto;
+                })
+                .into(new ArrayList<>());
     }
 
     @Override
     public void save(Auto auto) {
-        auto.setDate(new java.sql.Date(new java.util.Date().getTime()));
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        session.save(auto);
-        session.getTransaction().commit();
-        session.close();
-    }
+        auto.setDate(LocalDateTime.now());
+        collection.insertOne(mapFrom(auto));
 
-    public Engine getRandomEngine() {
-        Session session = sessionFactory.openSession();
-        List <Engine> engines = session.createQuery("FROM Engine", Engine.class).list();
-        return engines.get(new Random().nextInt(0, engines.size() - 1));
     }
 
     @Override
@@ -69,9 +60,9 @@ public class DBAutoRepository implements CrudRepository<Auto> {
     }
 
     public void clear() {
-        Session session = sessionFactory.openSession();
-        session.createQuery("delete from Auto").executeUpdate();
-        session.close();
+//        Session session = sessionFactory.openSession();
+//        session.createQuery("delete from Auto").executeUpdate();
+//        session.close();
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.service;
 import com.annotation.Autowired;
 import com.annotation.Singleton;
 import com.model.Auto;
-import com.repository.DBAutoRepository;
+import com.repository.MongoAutoRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,20 +14,13 @@ public class AutoService extends VehicleService<Auto> {
 
     private static AutoService instance;
 
-    public static AutoService getInstance() {
-        if (instance == null) {
-            instance = new AutoService(DBAutoRepository.getInstance());
-        }
-        return instance;
-    }
-
     public void clear() {
         repository.clear();
     }
 
     @Autowired
-    private AutoService(DBAutoRepository dbAutoRepository) {
-        super(dbAutoRepository);
+    public AutoService(MongoAutoRepository mongoAutoRepository) {
+        super(mongoAutoRepository);
     }
 
     public void save(Auto auto) {
@@ -59,6 +52,7 @@ public class AutoService extends VehicleService<Auto> {
         auto.setPrice(BigDecimal.valueOf(RANDOM.nextDouble(1000.0)));
         auto.setBodyType("BT-" + RANDOM.nextInt(1000));
         auto.setCount(RANDOM.nextInt(1, 20));
+        auto.setEngine(ENGINE_SERVICE.getOneRandomEngine());
         return auto;
     }
 

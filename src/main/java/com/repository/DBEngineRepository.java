@@ -1,7 +1,6 @@
 package com.repository;
 
 import com.model.Engine;
-import com.util.HibernateFactoryUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -18,26 +17,33 @@ public class DBEngineRepository {
 
     private static SessionFactory sessionFactory;
 
-    private DBEngineRepository() {
-        sessionFactory = HibernateFactoryUtil.getSessionFactory();
-    }
+//    private DBEngineRepository() {
+//        sessionFactory = HibernateFactoryUtil.getSessionFactory();
+//    }
 
-    public static DBEngineRepository getInstance() {
-        if (instance == null) {
-            instance = new DBEngineRepository();
-        }
-        return instance;
-    }
+//    public static DBEngineRepository getInstance() {
+//        if (instance == null) {
+//            instance = new DBEngineRepository();
+//        }
+//        return instance;
+//    }
 
     public List<Engine> createRandomEngines(int numberOfEngines) {
         List<Engine> engines = new ArrayList<>();
-        for(int i = 0; i < numberOfEngines; i++) {
+        for (int i = 0; i < numberOfEngines; i++) {
             Engine engine = new Engine();
             engine.setVolume(RANDOM.nextInt(998, 4998));
-            engine.setBrand(RandomStringUtils.random(5,true,false));
+            engine.setBrand(RandomStringUtils.random(5, true, false));
             engines.add(engine);
         }
         return engines;
+    }
+
+    public Engine createOneRandomEngine() {
+        Engine engine = new Engine();
+        engine.setVolume(RANDOM.nextInt(998, 4998));
+        engine.setBrand(RandomStringUtils.random(5, true, false));
+        return engine;
     }
 
     public void save(List<Engine> engines) {

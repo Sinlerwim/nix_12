@@ -2,53 +2,38 @@ package com.repository;
 
 import com.model.Auto;
 import com.model.Bus;
-import com.model.Engine;
-import com.util.HibernateFactoryUtil;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import com.mongodb.client.MongoDatabase;
+import org.bson.types.ObjectId;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
-public class DBBusRepository implements CrudRepository<Bus> {
+public class MongoBusRepository extends CrudRepository<Bus> {
 
-    private static DBBusRepository instance;
+    private static final String COLLECTION_NAME = "Bus";
 
-    private static SessionFactory sessionFactory;
-
-    private DBBusRepository() {
-        sessionFactory = HibernateFactoryUtil.getSessionFactory();
-    }
-
-    public static DBBusRepository getInstance() {
-        if (instance == null) {
-            instance = new DBBusRepository();
-        }
-        return instance;
+    public MongoBusRepository(MongoDatabase db) {
+        super(db, COLLECTION_NAME);
     }
 
     @Override
     public List<Bus> getAll() {
-        Session session = sessionFactory.openSession();
-        return session.createQuery("FROM Bus ", Bus.class).list();
+        return collection.find()
+                .map(item -> {
+                    Bus bus = gson.fromJson(item.toJson(), Bus.class);
+                    bus.setId(item.get("_id", ObjectId.class).toString());
+                    return bus;
+                })
+                .into(new ArrayList<>());
     }
 
     @Override
     public void save(Bus bus) {
-        bus.setDate(new java.sql.Date(new java.util.Date().getTime()));
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        session.save(bus);
-        session.getTransaction().commit();
-        session.close();
-    }
-
-    public Engine getRandomEngine() {
-        Session session = sessionFactory.openSession();
-        List <Engine> engines = session.createQuery("FROM Engine", Engine.class).list();
-        return engines.get(new Random().nextInt(0, engines.size() - 1));
+        bus.setDate(LocalDateTime.now());
+        collection.insertOne(mapFrom(bus));
     }
 
     @Override
@@ -62,9 +47,9 @@ public class DBBusRepository implements CrudRepository<Bus> {
     }
 
     public void clear() {
-        Session session = sessionFactory.openSession();
-        session.createQuery("delete from Auto").executeUpdate();
-        session.close();
+//        Session session = sessionFactory.openSession();
+//        session.createQuery("delete from Auto").executeUpdate();
+//        session.close();
     }
 
     @Override

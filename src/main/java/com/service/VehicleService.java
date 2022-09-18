@@ -17,6 +17,7 @@ public abstract class VehicleService<T extends Vehicle> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AutoService.class);
     protected CrudRepository<T> repository;
     protected static final Random RANDOM = new Random();
+    protected static final EngineService ENGINE_SERVICE = new EngineService();
 
     public VehicleService(CrudRepository<T> repository) {
         this.repository = repository;

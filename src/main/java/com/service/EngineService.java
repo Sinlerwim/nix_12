@@ -10,16 +10,9 @@ public class EngineService {
 
     private static EngineService instance;
 
-    private static final DBEngineRepository REPOSITORY = DBEngineRepository.getInstance();
+    private static final DBEngineRepository REPOSITORY = new DBEngineRepository();
 
     private static final Random RANDOM = new Random();
-
-    public static EngineService getInstance() {
-        if (instance == null) {
-            instance = new EngineService();
-        }
-        return instance;
-    }
 
     public void initEnginesDB(int numberOfEngines) {
         List<Engine> engines = REPOSITORY.createRandomEngines(numberOfEngines);
@@ -28,6 +21,10 @@ public class EngineService {
 
     public Engine getRandomEngineFromDB() {
         List<Engine> engines = REPOSITORY.getAll();
-        return engines.get(RANDOM.nextInt(0,engines.size() - 1));
+        return engines.get(RANDOM.nextInt(0, engines.size() - 1));
+    }
+
+    public Engine getOneRandomEngine() {
+        return REPOSITORY.createOneRandomEngine();
     }
 }
