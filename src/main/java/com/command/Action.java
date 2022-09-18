@@ -16,6 +16,8 @@ public enum Action {
     AUTO_BUILDER("Show auto builder example", new ShowAutoBuilder()),
     ANNOTATION("Show annotation example", new Annotation()),
     JDBC("Show JDBC work", new DataBase()),
+    COUNT_THREADS("Show 50 threads printing their numbers", new ShowThread()),
+    COUNT_SIMPLE_NUMBERS("Calculate amount of prime number in List", new ListThread()),
     EXIT("Exit", null);
 
 
