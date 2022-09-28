@@ -97,22 +97,22 @@ public class VehicleFactory {
     }
 
     public static boolean changePriceById(String id, BigDecimal price) {
-        return AUTO_SERVICE.changePriceById(id, price);
-//                BUS_SERVICE.changePriceById(id, price) |
-//                TRUCK_SERVICE.changePriceById(id, price);
+        return AUTO_SERVICE.changePriceById(id, price) |
+                BUS_SERVICE.changePriceById(id, price) |
+                TRUCK_SERVICE.changePriceById(id, price);
     }
 
     public static void printAll() {
         AUTO_SERVICE.printAll();
-//        BUS_SERVICE.printAll();
-//        TRUCK_SERVICE.printAll();
+        BUS_SERVICE.printAll();
+        TRUCK_SERVICE.printAll();
         System.out.println();
     }
 
     public static boolean deleteById(String id) {
-        return AUTO_SERVICE.delete(id);
-//                BUS_SERVICE.delete(id) |
-//                TRUCK_SERVICE.delete(id);
+        return AUTO_SERVICE.delete(id) |
+                BUS_SERVICE.delete(id) |
+                TRUCK_SERVICE.delete(id);
     }
 
 }

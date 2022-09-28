@@ -19,6 +19,7 @@ public enum Action {
     COUNT_THREADS("Show 50 threads printing their numbers", new ShowThread()),
     COUNT_SIMPLE_NUMBERS("Calculate amount of prime number in List", new ListThread()),
     DETAILS_FACTORY("Show factory with 5 threads work", new DetailsFactory()),
+    FLYWAY("Show FlyWay work", new ShowFlyWay()),
     EXIT("Exit", null);
 
 
