@@ -1,0 +1,1 @@
+web: java $JAVA_OPTS -jar target/Nix_12-1.0-SNAPSHOT.jar

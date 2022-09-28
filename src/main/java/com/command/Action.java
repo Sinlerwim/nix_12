@@ -18,6 +18,7 @@ public enum Action {
     JDBC("Show JDBC work", new DataBase()),
     COUNT_THREADS("Show 50 threads printing their numbers", new ShowThread()),
     COUNT_SIMPLE_NUMBERS("Calculate amount of prime number in List", new ListThread()),
+    FLYWAY("Show FlyWay work", new ShowFlyWay()),
     EXIT("Exit", null);
 
 

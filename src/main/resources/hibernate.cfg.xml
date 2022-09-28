@@ -9,6 +9,13 @@
         <property name="hibernate.connection.username">postgres</property>
         <property name="hibernate.connection.password">admin</property>
         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/NixHibernate</property>
+        <!--        <property name="hibernate.connection.username">ycmhyanrknrjjt</property>-->
+        <!--        <property name="hibernate.connection.password">-->
+        <!--            ef1fddc5965834a3b22fef66e9dc5223cef90937a347fdd99a8376839bc76a70-->
+        <!--        </property>-->
+        <!--        <property name="hibernate.connection.url">-->
+        <!--            jdbc:postgresql://ec2-3-219-19-205.compute-1.amazonaws.com:5432/d69dirj0vu1436-->
+        <!--        </property>-->
         <property name="hibernate.hbm2ddl.auto">create-drop</property>
         <property name="hibernate.show_sql">true</property>
 
